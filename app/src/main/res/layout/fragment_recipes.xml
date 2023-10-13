@@ -8,7 +8,7 @@
     tools:context=".RecipesFragment">
 
     <com.cooltechworks.views.shimmer.ShimmerRecyclerView
-        android:id="@+id/shimmer_recycler_view"
+        android:id="@+id/recyclerview"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -18,7 +18,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shimmer_demo_child_count="3"
+        app:shimmer_demo_layout="@layout/placeholder_row_layout" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
