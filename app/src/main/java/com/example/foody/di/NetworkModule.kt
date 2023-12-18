@@ -2,6 +2,7 @@ package com.example.foody.di
 
 import com.example.foody.Constants.Companion.BASE_URL
 import com.example.foody.FoodRecipesApi
+import com.example.foody.network.OkHttpClientProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,11 +19,8 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideHttpClient(): OkHttpClient {
-        return OkHttpClient().newBuilder()
-            .readTimeout(15, TimeUnit.SECONDS)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .build()
+    fun provideHttpClient(okHttpClientProvider: OkHttpClientProvider): OkHttpClient {
+        return okHttpClientProvider.okhttpClient
     }
 
     @Singleton
