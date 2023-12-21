@@ -1,26 +1,28 @@
 package com.example.foody.di
 
-import com.example.foody.Constants.Companion.BASE_URL
-import com.example.foody.FoodRecipesApi
-import com.example.foody.network.OkHttpClientProvider
+import com.example.foody.util.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.internal.managers.ApplicationComponentManager
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+// Hilt DI module
 @Module
-@InstallIn(ApplicationComponentManager::class)
+@InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideHttpClient(okHttpClientProvider: OkHttpClientProvider): OkHttpClient {
-        return okHttpClientProvider.okhttpClient
+    fun provideHttpClient(): OkHttpClient {
+        return OkHttpClient().newBuilder()
+            .readTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .build()
     }
 
     @Singleton
@@ -29,6 +31,7 @@ object NetworkModule {
         return GsonConverterFactory.create()
     }
 
+    // we pass this retrofit to repository (or somewhere else)
     @Singleton
     @Provides
     fun provideRetrofitInstance(
@@ -40,11 +43,5 @@ object NetworkModule {
             .client(okHttpClient)
             .addConverterFactory(gsonConverterFactory)
             .build()
-    }
-
-    @Singleton
-    @Provides
-    fun provideApiService(retrofit: Retrofit): FoodRecipesApi {
-        return retrofit.create(FoodRecipesApi::class.java)
     }
 }
