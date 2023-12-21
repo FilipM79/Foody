@@ -4,22 +4,30 @@ import android.util.Log
 import com.example.foody.domain.model.Ingredient
 import com.example.foody.domain.model.RecipeInfo
 import com.example.foody.search.domain.FoodRecipesSearchRepository
-import com.example.foody.search.data.model.RecipeItemResponse
+import com.example.foody.domain.model.RecipeItemResponse
 import com.example.foody.search.data.model.RecipeSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
 import retrofit2.Retrofit
 import java.io.IOException
 import javax.inject.Inject
 
+// This is step 8
+// (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
+// 5.FoodRecipesSearchRepository, 6. Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
+// 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
+// 13.RecipesFragment, 14.MainActivity)
+
+// Retrofit in constructor is a retrofit from NetworkModule
 @ViewModelScoped
-// This retrofit is a retrofit from module
-class FoodRecipesApiService @Inject constructor(retrofit: Retrofit): FoodRecipesSearchRepository {
+class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
+    : FoodRecipesSearchRepository {
 
     companion object {
         private const val PAGE_SIZE: Int = 10
         private const val TAG = "FoodRecipesSearchRepository"
     }
 
+    // Retrofit service
     private val service = retrofit.create(FoodRecipesApi::class.java)
 
     override suspend fun search(searchTerm: String) : List<RecipeInfo> {
@@ -39,7 +47,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit): FoodRecipes
         Log.e(TAG, "$code, $errorMessage")
     }
 
-    private fun RecipeSearchResponse.mapToBasicInfoList(): List<RecipeInfo> = this.meals.map { it ->
+    private fun RecipeSearchResponse.mapToBasicInfoList(): List<RecipeInfo> = this.recipes.map { it ->
         RecipeInfo(
             id = it.idMeal!!,
             title = it.strMeal!!,
