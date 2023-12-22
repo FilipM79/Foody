@@ -1,5 +1,6 @@
 package com.example.foody.recipe_details.presentation.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,15 +28,21 @@ import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
 
 @Composable
 fun RecipeDetailsScreen(
-    viewModel: RecipeDetailsViewModel = hiltViewModel()
+    recipeViewModel: RecipeDetailsViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
-    var recipeId by remember { mutableStateOf("") }
+    val recipeId = recipeViewModel.recipeId
+    Log.d("RecipeDetailsScreen", "... val recipeId is -$recipeId -...")
+
+    recipeViewModel.getRecipeDetails(recipeId = recipeId)
+    Log.d("RecipeDetailsScreen", "... after getRecipeDetails")
+
+    val state by recipeViewModel.state.collectAsState()
     RecipeDetailsItem(item = state.recipeDetails)
 }
 
 @Composable
 fun RecipeDetailsItem(item: RecipeInfo) {
+    Log.d("RecipeDetailsScreen", "... beginning of fun RecipeDetailsItem")
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = item.id,
@@ -102,6 +109,8 @@ fun RecipeDetailsItem(item: RecipeInfo) {
                 .padding(4.dp)
         )
         Spacer(Modifier.size(8.dp))
+
+        Log.d("RecipeDetailsScreen", "... end of fun RecipeDetailsItem")
 
     }
 }

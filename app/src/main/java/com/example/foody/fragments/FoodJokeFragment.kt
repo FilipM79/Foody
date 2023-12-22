@@ -5,7 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
 import com.example.foody.R
+import com.example.foody.recipe_details.presentation.ui.RecipeDetailsScreen
+import com.example.foody.search.presentation_mvvm.ui.SearchScreen
 
 class FoodJokeFragment : Fragment() {
 
@@ -14,7 +17,11 @@ class FoodJokeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_food_joke, container, false)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                RecipeDetailsScreen()
+            }
+        }
     }
 
 }

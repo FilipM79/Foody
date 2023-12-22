@@ -1,5 +1,6 @@
 package com.example.foody.search.presentation_mvvm.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.foody.R
 import com.example.foody.shared.domain.model.RecipeInfo
@@ -46,10 +49,11 @@ import com.example.foody.search.presentation_mvvm.SearchViewModel
 // 5.FoodRecipesSearchRepository, 6. Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
+
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
-    viewModel2: RecipeDetailsViewModel = hiltViewModel()
+    detailsViewModel: RecipeDetailsViewModel = hiltViewModel()
 ) {
 
     var searchTerm by remember { mutableStateOf("") }
@@ -76,7 +80,7 @@ fun SearchScreen(
                 painter = painterResource(R.drawable._23),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                alpha = 0.07f
+                alpha = 0.2f
             )
             LazyColumn(
                 verticalArrangement = Arrangement.Center,
@@ -87,7 +91,7 @@ fun SearchScreen(
                     count = state.recipes.size,
                     key = { index -> state.recipes[index].id } // ???
                 ) {
-                    RecipeItem(item = state.recipes[it], viewModel = viewModel2) // ???
+                    RecipeItem(item = state.recipes[it], recipeViewModel = detailsViewModel) // ???
                 }
             }
         }
@@ -95,13 +99,16 @@ fun SearchScreen(
 }
 
 @Composable
-fun RecipeItem(item: RecipeInfo, viewModel: RecipeDetailsViewModel) {
-
+fun RecipeItem(item: RecipeInfo, recipeViewModel: RecipeDetailsViewModel) {
+    var recipeId by rememberSaveable { mutableStateOf("") }
     Column(
         modifier = Modifier
             .padding(16.dp)
             .clickable(enabled = true, onClick = {
-                viewModel.getRecipeDetails(item.id)
+                recipeId = item.id
+                recipeViewModel.recipeId = recipeId
+                Log.d("SearchScreen", "recipeId is ${item.id}, VMid is ${recipeViewModel.recipeId}")
+//                recipeViewModel.getRecipeDetails(recipeId = recipeViewModel.recipeId)
             })
     ) {
         Card(elevation = CardDefaults.elevatedCardElevation(8.dp)) {
