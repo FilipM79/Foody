@@ -1,4 +1,4 @@
-package com.example.foody.domain.model
+package com.example.foody.shared.domain.model
 
 // This is step 7
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,

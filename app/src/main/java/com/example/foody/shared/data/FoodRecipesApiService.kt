@@ -1,10 +1,12 @@
-package com.example.foody.data
+package com.example.foody.shared.data
 
 import android.util.Log
-import com.example.foody.domain.model.Ingredient
-import com.example.foody.domain.model.RecipeInfo
+import com.example.foody.shared.domain.model.Ingredient
+import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.search.domain.FoodRecipesSearchRepository
-import com.example.foody.domain.model.RecipeItemResponse
+import com.example.foody.shared.domain.model.RecipeItemResponse
+import com.example.foody.recipe_details.data.model.RecipeDetailsSearchResponse
+import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.search.data.model.RecipeSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
 import retrofit2.Retrofit
@@ -20,7 +22,7 @@ import javax.inject.Inject
 // Retrofit in constructor is a retrofit from NetworkModule
 @ViewModelScoped
 class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
-    : FoodRecipesSearchRepository {
+    : FoodRecipesSearchRepository, RecipeDetailsSearchRepository {
 
     companion object {
         private const val PAGE_SIZE: Int = 10
@@ -58,14 +60,11 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
             imageUrl = it.strMealThumb!!,
             videoUrl = it.strYoutube,
 //            dateModified = it.dateModified.orEmpty(),
-            tags = it?.strTags?.split(",").orEmpty()
+            tags = it.strTags?.split(",").orEmpty()
         )
     }
 
-    private fun createIngredient(
-        ingredient: String?,
-        measure: String?
-    ): Ingredient? {
+    private fun createIngredient(ingredient: String?, measure: String?): Ingredient? {
 
         // A moze i ovako
 //        return if (ingredient.isNotEmpty()) {
@@ -77,12 +76,26 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
         }
     }
 
-//    // Ovo je anonimna implementacija interfejsa
-//    private val impl = object : FoodRecipesSearchApi {
-//        override suspend fun search(searchTerm: String): Response<MealSearchResult> {
-//
-//        }
-//    }
+    override suspend fun getRecipeDetails(recipeId: String): RecipeInfo {
+        val response = service.getRecipeDetails(
+            recipeId = recipeId
+        )
+        return response.body()?.mapToRecipeDetails()!!
+    }
+
+    private fun RecipeDetailsSearchResponse.mapToRecipeDetails(): RecipeInfo =
+        RecipeInfo(
+            id = recipe.idMeal!!,
+            title = recipe.strMeal!!,
+            cuisine = recipe.strArea!!,
+            category = recipe.strCategory!!,
+            ingredients = recipe.mapToIngredients(),
+            recipe = recipe.strInstructions!!,
+            imageUrl = recipe.strMealThumb!!,
+            videoUrl = recipe.strYoutube,
+//            dateModified = it.dateModified.orEmpty(),
+            tags = recipe.strTags?.split(",").orEmpty()
+        )
 
     private fun RecipeItemResponse.mapToIngredients(): List<Ingredient> {
         val ingredients = mutableListOf<Ingredient>()

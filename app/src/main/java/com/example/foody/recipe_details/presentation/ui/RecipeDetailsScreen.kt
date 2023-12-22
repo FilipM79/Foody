@@ -1,60 +1,41 @@
 package com.example.foody.recipe_details.presentation.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import com.example.foody.R
-import com.example.foody.domain.model.RecipeInfo
+import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
-import com.example.foody.search.presentation_mvvm.SearchViewModel
-import com.example.foody.search.presentation_mvvm.ui.RecipeItem
 
 @Composable
 fun RecipeDetailsScreen(
     viewModel: RecipeDetailsViewModel = hiltViewModel()
 ) {
-
+    val state by viewModel.state.collectAsState()
     var recipeId by remember { mutableStateOf("") }
-    var searchTerm by remember { mutableStateOf("") }
+    RecipeDetailsItem(item = state.recipeDetails)
 }
 
 @Composable
-fun RecipeItem(item: RecipeInfo) {
+fun RecipeDetailsItem(item: RecipeInfo) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = item.id,

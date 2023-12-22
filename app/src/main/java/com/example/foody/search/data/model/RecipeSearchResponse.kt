@@ -1,6 +1,6 @@
 package com.example.foody.search.data.model
 
-import com.example.foody.domain.model.RecipeItemResponse
+import com.example.foody.shared.domain.model.RecipeItemResponse
 import com.google.gson.annotations.SerializedName
 
 // This is step 3

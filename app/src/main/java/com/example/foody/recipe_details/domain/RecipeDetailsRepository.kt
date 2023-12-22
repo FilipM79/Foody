@@ -1,8 +1,8 @@
 package com.example.foody.recipe_details.domain
 
-import com.example.foody.domain.model.RecipeInfo
+import com.example.foody.shared.domain.model.RecipeInfo
 
-interface RecipeDetailsRepository {
+interface RecipeDetailsSearchRepository {
     suspend fun getRecipeDetails(recipeId: String) : RecipeInfo
 
 }

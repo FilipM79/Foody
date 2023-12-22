@@ -2,7 +2,6 @@ package com.example.foody.search.presentation_mvvm.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -38,10 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.foody.R
-import com.example.foody.domain.model.RecipeInfo
+import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
 import com.example.foody.search.presentation_mvvm.SearchViewModel
 
@@ -106,7 +102,6 @@ fun RecipeItem(item: RecipeInfo, viewModel: RecipeDetailsViewModel) {
             .padding(16.dp)
             .clickable(enabled = true, onClick = {
                 viewModel.getRecipeDetails(item.id)
-
             })
     ) {
         Card(elevation = CardDefaults.elevatedCardElevation(8.dp)) {

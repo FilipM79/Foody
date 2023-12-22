@@ -1,6 +1,6 @@
-package com.example.foody.di
+package com.example.foody.shared.di
 
-import com.example.foody.util.Constants.BASE_URL
+import com.example.foody.shared.util.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

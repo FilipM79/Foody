@@ -1,6 +1,6 @@
 package com.example.foody.search.presentation_mvvm.model
 
-import com.example.foody.domain.model.RecipeInfo
+import com.example.foody.shared.domain.model.RecipeInfo
 
 // This is step 10
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
