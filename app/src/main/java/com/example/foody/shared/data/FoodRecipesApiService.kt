@@ -5,12 +5,12 @@ import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.search.domain.FoodRecipesSearchRepository
 import com.example.foody.shared.domain.model.RecipeItemResponse
-import com.example.foody.recipe_details.data.model.RecipeDetailsSearchResponse
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.search.data.model.RecipeSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
 import retrofit2.Retrofit
 import java.io.IOException
+import java.util.Optional
 import javax.inject.Inject
 
 // This is step 8
@@ -37,8 +37,8 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
             searchTerm = searchTerm
         )
         if (response.isSuccessful) {
-            return response.body()?.mapToBasicInfoList()
-                ?: throw NullPointerException("Response body is null.")
+            return response.body()?.mapToInfoList()
+                ?: throw NullPointerException("Search response body is null.")
         } else {
             handleError(response.code(), response.message())
             throw IOException("${response.code()}, ${response.message()}")
@@ -49,7 +49,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
         Log.e(TAG, "$code, $errorMessage")
     }
 
-    private fun RecipeSearchResponse.mapToBasicInfoList(): List<RecipeInfo> = this.recipes.map { it ->
+    private fun RecipeSearchResponse.mapToInfoList(): List<RecipeInfo> = this.recipes.map { it ->
         RecipeInfo(
             id = it.idMeal!!,
             title = it.strMeal!!,
@@ -80,22 +80,17 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
         val response = service.getRecipeDetails(
             recipeId = recipeId
         )
-        return response.body()?.mapToRecipeDetails()!!
-    }
 
-    private fun RecipeDetailsSearchResponse.mapToRecipeDetails(): RecipeInfo =
-        RecipeInfo(
-            id = recipe.idMeal!!,
-            title = recipe.strMeal!!,
-            cuisine = recipe.strArea!!,
-            category = recipe.strCategory!!,
-            ingredients = recipe.mapToIngredients(),
-            recipe = recipe.strInstructions!!,
-            imageUrl = recipe.strMealThumb!!,
-            videoUrl = recipe.strYoutube,
-//            dateModified = it.dateModified.orEmpty(),
-            tags = recipe.strTags?.split(",").orEmpty()
-        )
+        if (response.isSuccessful) {
+            return response.body()?.let {
+                it.mapToInfoList().firstOrNull()
+                    ?: throw NullPointerException("Response is empty list.")
+            } ?: throw NullPointerException("Response body is null.")
+        } else {
+            handleError(response.code(), response.message())
+            throw IOException("${response.code()}, ${response.message()}")
+        }
+    }
 
     private fun RecipeItemResponse.mapToIngredients(): List<Ingredient> {
         val ingredients = mutableListOf<Ingredient>()

@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +43,9 @@ import coil.compose.AsyncImage
 import com.example.foody.R
 import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
+import com.example.foody.search.presentation_mvvm.SearchNavigationEvent
 import com.example.foody.search.presentation_mvvm.SearchViewModel
+import com.example.foody.shared.ClickedRecipe
 
 // This is step 12
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
@@ -52,8 +55,8 @@ import com.example.foody.search.presentation_mvvm.SearchViewModel
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = hiltViewModel(),
-    detailsViewModel: RecipeDetailsViewModel = hiltViewModel()
+    goToDetailsScreen: (String) -> Unit,
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
 
     var searchTerm by remember { mutableStateOf("") }
@@ -91,7 +94,23 @@ fun SearchScreen(
                     count = state.recipes.size,
                     key = { index -> state.recipes[index].id } // ???
                 ) {
-                    RecipeItem(item = state.recipes[it], recipeViewModel = detailsViewModel) // ???
+//                    RecipeItem(item = state.recipes[it], goToDetailsScreen) // Moje staro
+                    RecipeItem(item = state.recipes[it]) { recipeId ->
+                        // ovako idemo preko VM
+                        // ovo nam salje jedan event (Channel.send())
+                        viewModel.navigateTo(SearchNavigationEvent.ToDetails(recipeId))
+                    }
+                }
+            }
+        }
+    }
+
+    // Ovo je kolektovanje (primanje) eventa sa druge strane Pipeline-a
+    LaunchedEffect(key1 = Unit ) {
+        viewModel.navigation.collect { navigationEvent ->
+            when(navigationEvent) {
+                is SearchNavigationEvent.ToDetails -> {
+                    goToDetailsScreen(navigationEvent.recipeId)
                 }
             }
         }
@@ -99,17 +118,14 @@ fun SearchScreen(
 }
 
 @Composable
-fun RecipeItem(item: RecipeInfo, recipeViewModel: RecipeDetailsViewModel) {
-    var recipeId by rememberSaveable { mutableStateOf("") }
+fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
     Column(
         modifier = Modifier
             .padding(16.dp)
             .clickable(enabled = true, onClick = {
-                recipeId = item.id
-                recipeViewModel.recipeId = recipeId
-                Log.d("SearchScreen", "recipeId is ${item.id}, VMid is ${recipeViewModel.recipeId}")
-//                recipeViewModel.getRecipeDetails(recipeId = recipeViewModel.recipeId)
-            })
+                goToDetailsScreen(item.id)
+            }
+            )
     ) {
         Card(elevation = CardDefaults.elevatedCardElevation(8.dp)) {
             Text(

@@ -8,13 +8,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,24 +28,45 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
+import com.example.foody.recipe_details.presentation.model.RecipeInfoState
 
 @Composable
 fun RecipeDetailsScreen(
+    recipeId: String,
     recipeViewModel: RecipeDetailsViewModel = hiltViewModel()
 ) {
-    val recipeId = recipeViewModel.recipeId
-    Log.d("RecipeDetailsScreen", "... val recipeId is -$recipeId -...")
 
-    recipeViewModel.getRecipeDetails(recipeId = recipeId)
-    Log.d("RecipeDetailsScreen", "... after getRecipeDetails")
+    // Way 2
+    LaunchedEffect(key1 = recipeId) {
+        recipeViewModel.getRecipeDetails(recipeId)
+    }
+
+//    // Way 3
+//    rememberSaveable {
+//        recipeViewModel.getRecipeDetails(recipeId)
+//        ""
+//    }
+
+    // Way 4 is via SavedStateHandle
+
+    // 5-th way is via Custom State Handler Implementation
 
     val state by recipeViewModel.state.collectAsState()
-    RecipeDetailsItem(item = state.recipeDetails)
+    when (val detailsState = state.detailsState) { // Biranje po tipu
+        is RecipeInfoState.RecipeInfoValue -> RecipeDetailsItem(item = detailsState.recipeDetails)
+        is RecipeInfoState.RecipeInfoLoading -> CircularProgressIndicator()
+        is RecipeInfoState.RecipeInfoError -> ErrorMessage(errorMessage = detailsState.message)
+    }
+}
+
+@Composable
+fun ErrorMessage(errorMessage: String) {
+    Text(text = errorMessage)
 }
 
 @Composable
 fun RecipeDetailsItem(item: RecipeInfo) {
-    Log.d("RecipeDetailsScreen", "... beginning of fun RecipeDetailsItem")
+    Log.e("RecipeDetailsScreen", "... beginning of fun RecipeDetailsItem")
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = item.id,
@@ -110,7 +134,7 @@ fun RecipeDetailsItem(item: RecipeInfo) {
         )
         Spacer(Modifier.size(8.dp))
 
-        Log.d("RecipeDetailsScreen", "... end of fun RecipeDetailsItem")
+        Log.e("RecipeDetailsScreen", "... end of fun RecipeDetailsItem")
 
     }
 }

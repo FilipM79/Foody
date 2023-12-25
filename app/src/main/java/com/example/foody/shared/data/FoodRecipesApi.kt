@@ -1,6 +1,5 @@
 package com.example.foody.shared.data
 
-import com.example.foody.recipe_details.data.model.RecipeDetailsSearchResponse
 import com.example.foody.search.data.model.RecipeSearchResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -24,7 +23,7 @@ interface FoodRecipesApi {
     @GET("/api/json/v1/1/lookup.php")
     suspend fun getRecipeDetails(
         @Query("i") recipeId: String
-    ) : Response<RecipeDetailsSearchResponse>
+    ) : Response<RecipeSearchResponse>
 
     @GET("/api/json/v1/1/search.php")
     suspend fun listAllMealsByLetter(

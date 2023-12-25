@@ -6,14 +6,14 @@ package com.example.foody.shared.domain.model
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 data class RecipeInfo(
-    val id: String = "",
-    val title: String = "",
-    val cuisine: String = "",
-    val category: String = "",
-    val ingredients: List<Ingredient> = emptyList(),
-    val recipe: String = "",
-    val imageUrl: String = "",
-    val videoUrl: String? = "",
+    val id: String,
+    val title: String,
+    val cuisine: String,
+    val category: String,
+    val ingredients: List<Ingredient>,
+    val recipe: String,
+    val imageUrl: String,
+    val videoUrl: String?,
 //    val dateModified: Any,
-    val tags: List<String> = emptyList(),
+    val tags: List<String>,
 )
