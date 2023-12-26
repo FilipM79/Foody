@@ -10,32 +10,34 @@ import com.example.foody.search.data.model.RecipeSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
 import retrofit2.Retrofit
 import java.io.IOException
-import java.util.Optional
 import javax.inject.Inject
 
-// This is step 8
+// 8-th step
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
-// 5.FoodRecipesSearchRepository, 6. Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
+// 5.FoodRecipesSearchRepository, 6.Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
-// Retrofit in constructor is a retrofit from NetworkModule
+// retrofit in this class constructor is a retrofit from NetworkModule
+// here we are making a Recipe object from an Api response, by mapping ...
 @ViewModelScoped
 class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
     : FoodRecipesSearchRepository, RecipeDetailsSearchRepository {
 
     companion object {
-        private const val PAGE_SIZE: Int = 10
+//        private const val PAGE_SIZE: Int = 10
         private const val TAG = "FoodRecipesSearchRepository"
     }
 
-    // Retrofit service
+    // This is the Retrofit service, created from FoodRecipesApi interface
+    // we are using a constructor passed parameter retrofit to invoke a create function on it.
+    // This way we create a service which is of that interface type
+    // We can then access and override functions from that interface, and get a response back
     private val service = retrofit.create(FoodRecipesApi::class.java)
 
+    // Here we override a function from FoodRecipesSearchRepository interface
     override suspend fun search(searchTerm: String) : List<RecipeInfo> {
-        val response = service.search(
-            searchTerm = searchTerm
-        )
+        val response = service.search(searchTerm = searchTerm)
         if (response.isSuccessful) {
             return response.body()?.mapToInfoList()
                 ?: throw NullPointerException("Search response body is null.")
@@ -49,6 +51,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
         Log.e(TAG, "$code, $errorMessage")
     }
 
+    // Making extension function for mapping response to recipe list
     private fun RecipeSearchResponse.mapToInfoList(): List<RecipeInfo> = this.recipes.map { it ->
         RecipeInfo(
             id = it.idMeal!!,
@@ -59,27 +62,13 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
             recipe = it.strInstructions!!,
             imageUrl = it.strMealThumb!!,
             videoUrl = it.strYoutube,
-//            dateModified = it.dateModified.orEmpty(),
             tags = it.strTags?.split(",").orEmpty()
         )
     }
 
-    private fun createIngredient(ingredient: String?, measure: String?): Ingredient? {
-
-        // A moze i ovako
-//        return if (ingredient.isNotEmpty()) {
-//            Ingredient(title = ingredient, measure = measure)
-//        } else null
-
-        return ingredient?.takeIf { it.isNotEmpty() }?.let { ingredient2 ->
-            Ingredient(title = ingredient2, measure = measure.orEmpty()) // the same as measure ?: ""
-        }
-    }
-
+    // Here we override a function from FoodRecipesSearchRepository interface
     override suspend fun getRecipeDetails(recipeId: String): RecipeInfo {
-        val response = service.getRecipeDetails(
-            recipeId = recipeId
-        )
+        val response = service.getRecipeDetails(recipeId)
 
         if (response.isSuccessful) {
             return response.body()?.let {
@@ -92,6 +81,16 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
         }
     }
 
+    // We use this function when creating every of 20 ingredient fields
+    private fun createIngredient(ingredient: String?, measure: String?): Ingredient? {
+        return ingredient?.takeIf { it.isNotEmpty() }?.let { ingredient2 ->
+            Ingredient(title = ingredient2, measure = measure.orEmpty()) // the same as measure ?: ""
+        }
+//        // The other way...
+//        return if (ingredient.isNotEmpty()) { Ingredient(ingredient, measure) } else null
+    }
+
+    // Making extension function for mapping response to list of all ingredient fields
     private fun RecipeItemResponse.mapToIngredients(): List<Ingredient> {
         val ingredients = mutableListOf<Ingredient>()
 

@@ -2,10 +2,7 @@ package com.example.foody.recipe_details.presentation.model
 
 import com.example.foody.shared.domain.model.RecipeInfo
 
-data class RecipeDetailsState(
-    val detailsState: RecipeInfoState
-) {
-
+data class RecipeDetailsState(val detailsState: RecipeInfoState) {
     companion object {
         val initialValue = RecipeDetailsState(RecipeInfoState.RecipeInfoLoading)
     }

@@ -11,9 +11,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-// This is step 1
+// 1-st step
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
-// 5.FoodRecipesSearchRepository, 6. Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
+// 5.FoodRecipesSearchRepository, 6.Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
@@ -24,6 +24,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
+    // needed for provideRetrofitInstance function
     @Singleton
     @Provides
     fun provideHttpClient(): OkHttpClient {
@@ -33,6 +34,7 @@ object NetworkModule {
             .build()
     }
 
+    // needed for provideRetrofitInstance function
     @Singleton
     @Provides
     fun provideConverterFactory(): GsonConverterFactory {
