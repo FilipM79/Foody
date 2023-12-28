@@ -1,17 +1,20 @@
 package com.example.foody.search.presentation_mvvm.ui
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -23,24 +26,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.foody.R
-import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.search.presentation_mvvm.SearchNavigationEvent
 import com.example.foody.search.presentation_mvvm.SearchViewModel
+import com.example.foody.search.presentation_mvvm.model.SearchScreenState
+import com.example.foody.shared.domain.model.RecipeInfo
 
 // 12-th step
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
@@ -53,47 +56,19 @@ fun SearchScreen(
     goToDetailsScreen: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    var searchTerm by remember { mutableStateOf("") }
+    val state by viewModel.state.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row() {
-            TextField(
-                value = searchTerm,
-                onValueChange = { searchTerm = it },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Button(onClick = { viewModel.search(searchTerm) }) { Text(text = "Search") }
-        }
-        Spacer(modifier = Modifier.size(16.dp))
+    val performSearch: () -> Unit = remember { { viewModel.search() } }
+    val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
+    val navigateWith: (String) -> Unit =
+        remember { { viewModel.navigateTo(SearchNavigationEvent.ToDetails(it)) } }
 
-        val state by viewModel.state.collectAsState()
-        Box(modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))) {
-            Image(
-                painter = painterResource(R.drawable._23),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                alpha = 0.1f
-            )
-            LazyColumn(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                items(
-                    count = state.recipes.size,
-                    key = { index -> state.recipes[index].id } // ???
-                ) {
-//                    RecipeItem(item = state.recipes[it], goToDetailsScreen) // Moje staro
-                    RecipeItem(item = state.recipes[it]) { recipeId ->
-                        // ovako idemo preko viewModel-a
-                        // ovo nam salje jedan event (Channel.send())
-                        viewModel.navigateTo(SearchNavigationEvent.ToDetails(recipeId))
-                    }
-                }
-            }
-        }
-    }
+    SearchScreenContent(
+        state = state,
+        performSearch = performSearch,
+        navigateWith = navigateWith,
+        onValueChanged = onValueChanged
+    )
 
     // Ovo je kolektovanje (primanje) eventa sa druge strane Pipeline-a
     LaunchedEffect(key1 = Unit ) {
@@ -108,40 +83,123 @@ fun SearchScreen(
 }
 
 @Composable
-fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .clickable(enabled = true, onClick = {
-                goToDetailsScreen(item.id)
+private fun SearchScreenContent(
+    state: SearchScreenState,
+    performSearch: () -> Unit,
+    navigateWith: (recipeId: String) -> Unit,
+    onValueChanged: (searchTerm: String) -> Unit
+) {
+    LazyVerticalGrid(
+        contentPadding = PaddingValues(8.dp),
+        columns = GridCells.Adaptive(240.dp),
+        content = {
+            item {
+                SearchTextFieldAndButton(state, performSearch, onValueChanged)
             }
-            )
-    ) {
-        Card(elevation = CardDefaults.elevatedCardElevation(8.dp)) {
-            Text(
-                text = item.title,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .fillMaxWidth()
-                    .background(Color.White)
-//                    .border(2.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
-                    .padding(4.dp)
-            )
+            items(
+                count = state.recipes.size,
+                key = { index -> state.recipes[index].id } // ???
+            ) {
+                RecipeItem(item = state.recipes[it]) { recipeId ->
+                    // ovako idemo preko viewModel-a
+                    // ovo nam salje jedan event (Channel.send())
+                    navigateWith(recipeId)
+                }
+            }
         }
-        Spacer(Modifier.size(8.dp))
-        Card(elevation = CardDefaults.elevatedCardElevation(8.dp)) {
-            AsyncImage(
-                model = item.imageUrl,
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(16.dp))
-                    .fillMaxWidth()
-//                    .border(2.dp, Color.LightGray, shape = RoundedCornerShape(16.dp))
-            )
+    )
+}
+
+@Composable
+private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(8.dp),
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable(
+                    enabled = true,
+                    onClick = { goToDetailsScreen(item.id) }
+                )
+        ) {
+            Box {
+                RecipeImage(imageUrl = item.imageUrl)
+                Box(modifier = Modifier.padding(8.dp)) {
+                    RecipeTitle(title = item.title)
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun SearchTextFieldAndButton(
+    state: SearchScreenState,
+    performSearch: () -> Unit,
+    onValueChanged: (searchTerm: String) -> Unit
+) {
+    Row(
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = state.searchTerm,
+            onValueChange = { onValueChanged.invoke(it) }, // updates the changes on searchTerm
+            modifier = Modifier
+                .height(48.dp)
+                .weight(1f)
+                .clip(shape = RoundedCornerShape(12.dp))
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Button(onClick = { performSearch() }) { Text(text = "Search") }
+    }
+}
+
+@Composable
+private fun RecipeTitle(title: String) {
+    Text(
+        text = title,
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .clip(shape = RoundedCornerShape(12.dp))
+            .fillMaxWidth()
+            .background(brush = Brush.verticalGradient(
+                0f to Color.White,
+                1f to Color.Gray,
+                startY = 20f,
+                endY = 80.0f
+                ), alpha = 0.8f
+            )
+            .padding(8.dp),
+        color = Color.Black
+    )
+}
+
+@Composable
+private fun RecipeImage(imageUrl: String) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = null,
+        contentScale = ContentScale.FillWidth,
+        modifier = Modifier
+            .clip(shape = RoundedCornerShape(16.dp))
+            .fillMaxWidth()
+            .border(border = BorderStroke(2.dp, Color.Gray,), shape = RoundedCornerShape(16.dp))
+    )
+    Spacer(Modifier.size(8.dp))
+}
+
+@Composable
+@Preview
+private fun Preview() {
+    SearchScreenContent(
+        state = SearchScreenState(searchTerm = "", recipes = emptyList()),
+        performSearch = { Unit },
+        navigateWith = { Unit },
+        onValueChanged = { Unit },
+    )
 }

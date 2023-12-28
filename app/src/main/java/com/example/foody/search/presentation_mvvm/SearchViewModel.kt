@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,23 +29,30 @@ class SearchViewModel @Inject constructor(
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
 
+
     private val _navigation = Channel<SearchNavigationEvent>()
-    val navigation: Flow<SearchNavigationEvent> = _navigation.consumeAsFlow()
+    val navigation: Flow<SearchNavigationEvent> = _navigation.receiveAsFlow()
 
     fun navigateTo(event: SearchNavigationEvent) { viewModelScope.launch { _navigation.send(event) }}
 
-    fun search(searchTerm: String) {
+    fun search() {
         // Pojedinacni emit predstavlja jedan event tipa SearchScreenState koji flow emituje dalje
         // To se zatim kolektuje kao state u compose-u i dolazi do rekompozicije
         // ovako smo uradili radi efikasnijeg koriscenja memorije
         // (i zato sto zelimo da ostavimo ostale eventualne delove state-a nepromenjene)
 
         viewModelScope.launch(Dispatchers.IO) {  // prelazak na IO thread
-            val mealList = repository.search(searchTerm)
+            val mealList = repository.search(state.value.searchTerm)
 
             withContext(Dispatchers.Main) {// povratak na main thread ...
                 _state.emit(_state.value.copy(recipes = mealList))
             }
+        }
+    }
+
+    fun updateSearchTerm(searchTerm: String) {
+        viewModelScope.launch {
+            _state.emit(_state.value.copy(searchTerm = searchTerm))
         }
     }
 }

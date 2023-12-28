@@ -85,9 +85,9 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
     private fun createIngredient(ingredient: String?, measure: String?): Ingredient? {
         return ingredient?.takeIf { it.isNotEmpty() }?.let { ingredient2 ->
             Ingredient(title = ingredient2, measure = measure.orEmpty()) // the same as measure ?: ""
-        }
-//        // The other way...
+        // The other way...
 //        return if (ingredient.isNotEmpty()) { Ingredient(ingredient, measure) } else null
+        }
     }
 
     // Making extension function for mapping response to list of all ingredient fields
