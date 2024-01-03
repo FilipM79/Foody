@@ -52,7 +52,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
     }
 
     // Making extension function for mapping response to recipe list
-    private fun RecipeSearchResponse.mapToInfoList(): List<RecipeInfo> = this.recipes.map { it ->
+    private fun RecipeSearchResponse.mapToInfoList(): List<RecipeInfo>  = this.recipes?.map { it ->
         RecipeInfo(
             id = it.idMeal!!,
             title = it.strMeal!!,
@@ -60,11 +60,11 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
             category = it.strCategory!!,
             ingredients = it.mapToIngredients(),
             recipe = it.strInstructions!!,
-            imageUrl = it.strMealThumb!!,
+            imageUrl = it.strMealThumb,
             videoUrl = it.strYoutube,
             tags = it.strTags?.split(",").orEmpty()
         )
-    }
+    } ?: emptyList()
 
     // Here we override a function from FoodRecipesSearchRepository interface
     override suspend fun getRecipeDetails(recipeId: String): RecipeInfo {
@@ -156,4 +156,5 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
         }
         return ingredients
     }
+
 }

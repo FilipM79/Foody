@@ -12,5 +12,5 @@ import com.google.gson.annotations.SerializedName
 // This is the data class with the list of possible search items we could get from Api
 data class RecipeSearchResponse(
     @SerializedName("meals")
-    val recipes: List<RecipeItemResponse>
+    val recipes: List<RecipeItemResponse>?
 )

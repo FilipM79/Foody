@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,6 +46,7 @@ import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
 import com.example.foody.recipe_details.presentation.model.RecipeInfoState
 import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
+import com.example.foody.shared.util.Constants
 
 // 1-st way to get recipeId from previous Fragment is via LaunchedEffect.
 // Because in here we only do this once
@@ -83,7 +86,9 @@ fun RecipeDetailsItem(item: RecipeInfo) {
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            RecipeImage(imageUrl = item.imageUrl)
+            if (!item.imageUrl.isNullOrBlank()) {
+                RecipeImage(imageUrl = item.imageUrl)
+            }
             TextItem(item = item.cuisine, fieldTitle = "Cuisine")
             TextItem(item = item.category, fieldTitle = "Category")
             RecipeText(recipeText = item.recipe, fieldTitle = "Recipe")
@@ -198,19 +203,23 @@ fun Ingredients(ingredients: List<Ingredient>) {
                     key = null // ???
                 ) {
                     Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-                        Image(
-                            painterResource(id = R.drawable._23),
-                            contentDescription = null,
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
-                                .size(200.dp)
-                                .clip(shape = RoundedCornerShape(16.dp))
-                                .fillMaxWidth()
-                                .border(
-                                    border = BorderStroke(2.dp, Color.Gray,),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                        )
+                        Card(elevation = CardDefaults.elevatedCardElevation(8.dp)) {
+                            AsyncImage(
+                                model = "${Constants.BASE_URL}/images/ingredients/${ingredients[it].title}-Small.png",
+                                contentDescription = null,
+                                contentScale = ContentScale.FillWidth,
+                                modifier = Modifier
+                                    .size(200.dp)
+                                    .clip(shape = RoundedCornerShape(16.dp))
+                                    .fillMaxWidth()
+                                    .border(
+                                        border = BorderStroke(2.dp, Color.Gray,),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(16.dp)
+
+                            )
+                        }
                         Box(modifier = Modifier
                             .padding(8.dp)
                             .fillMaxWidth()
@@ -230,7 +239,7 @@ fun Ingredients(ingredients: List<Ingredient>) {
                                                 1f to Color.Gray,
                                                 startY = 20f,
                                                 endY = 80.0f
-                                            ), alpha = 0.5f
+                                            ), alpha = 0.7f
                                         )
                                         .padding(4.dp),
                                     color = Color.Black
@@ -250,7 +259,7 @@ fun Ingredients(ingredients: List<Ingredient>) {
                                                 1f to Color.Gray,
                                                 startY = 20f,
                                                 endY = 80.0f
-                                            ), alpha = 0.5f
+                                            ), alpha = 0.7f
                                         )
                                         .padding(4.dp),
                                     color = Color.Black

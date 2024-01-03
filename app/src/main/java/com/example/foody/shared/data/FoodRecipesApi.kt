@@ -61,5 +61,7 @@ interface FoodRecipesApi {
         @Query("a") area: String
     ) : Response<RecipeSearchResponse>
 
+    // www.themealdb.com/images/ingredients/Lime.png
+
 }
 

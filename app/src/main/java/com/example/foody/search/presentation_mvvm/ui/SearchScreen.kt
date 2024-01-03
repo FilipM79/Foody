@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.foody.recipe_details.presentation.ui.RecipeImage
 import com.example.foody.search.presentation_mvvm.SearchNavigationEvent
 import com.example.foody.search.presentation_mvvm.SearchViewModel
 import com.example.foody.search.presentation_mvvm.model.SearchScreenState
@@ -125,7 +126,9 @@ private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
                 )
         ) {
             Box {
-                RecipeImage(imageUrl = item.imageUrl)
+                if (!item.imageUrl.isNullOrBlank()) {
+                    RecipeImage(imageUrl = item.imageUrl)
+                }
                 Box(modifier = Modifier.padding(8.dp)) {
                     RecipeTitle(title = item.title)
                 }
