@@ -23,6 +23,10 @@ class RecipeDetailsViewModel @Inject constructor(
 
     fun getRecipeDetails(recipeId: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                _state.emit(_state.value.copy(detailsState = RecipeInfoState.RecipeInfoLoading))
+            }
+
             val newState = try {
                 val recipeDetails = repository.getRecipeDetails(recipeId = recipeId)
                 RecipeInfoState.RecipeInfoValue(recipeDetails)
