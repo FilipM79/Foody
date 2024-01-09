@@ -39,6 +39,7 @@ import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
 import com.example.foody.recipe_details.presentation.model.RecipeInfoState
 import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
+import com.example.foody.shared.presentation.assistedHiltViewModel
 import com.example.foody.shared.util.Constants
 
 // Passing the recipeId (coming from previous screen) to ViewModel:
@@ -55,7 +56,8 @@ import com.example.foody.shared.util.Constants
 //  with responsibility to hold the state until passed, and clear it once consumed.
 @Composable
 fun RecipeDetailsScreen(
-    recipeViewModel: RecipeDetailsViewModel //= hiltViewModel() assisted inject coming soon.
+    recipeId: String,
+    recipeViewModel: RecipeDetailsViewModel = assistedHiltViewModel(recipeId)
 ) {
     val state by recipeViewModel.state.collectAsState()
 
@@ -71,7 +73,7 @@ fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
 
 @Composable
 fun RecipeDetailsItem(item: RecipeInfo) {
-    Column() {
+    Column {
         RecipeTitleText(title = item.title)
         Column(
             modifier = Modifier
@@ -141,7 +143,7 @@ fun RecipeImage(imageUrl: String) {
             .padding(top = 4.dp)
             .clip(shape = RoundedCornerShape(16.dp))
             .fillMaxWidth()
-            .border(border = BorderStroke(2.dp, Color.Gray,), shape = RoundedCornerShape(16.dp))
+            .border(border = BorderStroke(2.dp, Color.Gray), shape = RoundedCornerShape(16.dp))
     )
     Spacer(Modifier.size(2.dp))
 }
@@ -177,7 +179,7 @@ fun RecipeText(recipeText: String, fieldTitle: String) {
 
 @Composable
 fun Ingredients(ingredients: List<Ingredient>) {
-    Column() {
+    Column {
         Text(
             text = "\nIngredients:\n",
             style = MaterialTheme.typography.titleMedium,
@@ -205,7 +207,7 @@ fun Ingredients(ingredients: List<Ingredient>) {
                                     .clip(shape = RoundedCornerShape(16.dp))
                                     .fillMaxWidth()
                                     .border(
-                                        border = BorderStroke(2.dp, Color.Gray,),
+                                        border = BorderStroke(2.dp, Color.Gray),
                                         shape = RoundedCornerShape(16.dp)
                                     )
                                     .padding(16.dp)
