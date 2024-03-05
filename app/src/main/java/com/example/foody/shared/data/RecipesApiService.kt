@@ -3,10 +3,10 @@ package com.example.foody.shared.data
 import android.util.Log
 import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
-import com.example.foody.search.domain.FoodRecipesSearchRepository
-import com.example.foody.shared.domain.model.RecipeItemResponse
+import com.example.foody.search.domain.RecipesSearchRepository
+import com.example.foody.shared.domain.model.Result
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
-import com.example.foody.search.data.model.RecipeSearchResponse
+import com.example.foody.search.data.model.RecipesSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
 import retrofit2.Retrofit
 import java.io.IOException
@@ -21,8 +21,8 @@ import javax.inject.Inject
 // retrofit in this class constructor is a retrofit from NetworkModule
 // here we are making a Recipe object from an Api response, by mapping ...
 @ViewModelScoped
-class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
-    : FoodRecipesSearchRepository, RecipeDetailsSearchRepository {
+class RecipesApiService @Inject constructor(retrofit: Retrofit)
+    : RecipesSearchRepository, RecipeDetailsSearchRepository {
 
     companion object {
 //        private const val PAGE_SIZE: Int = 10
@@ -33,7 +33,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
     // we are using a constructor passed parameter retrofit to invoke a create function on it.
     // This way we create a service which is of that interface type
     // We can then access and override functions from that interface, and get a response back
-    private val service = retrofit.create(FoodRecipesApi::class.java)
+    private val service = retrofit.create(RecipesApi::class.java)
 
     // Here we override a function from FoodRecipesSearchRepository interface
     override suspend fun search(searchTerm: String) : List<RecipeInfo> {
@@ -52,7 +52,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
     }
 
     // Making extension function for mapping response to recipe list
-    private fun RecipeSearchResponse.mapToInfoList(): List<RecipeInfo>  = this.recipes?.map { it ->
+    private fun RecipesSearchResponse.mapToInfoList(): List<RecipeInfo>  = this.recipes?.map { it ->
         RecipeInfo(
             id = it.idMeal!!,
             title = it.strMeal!!,
@@ -91,7 +91,7 @@ class FoodRecipesApiService @Inject constructor(retrofit: Retrofit)
     }
 
     // Making extension function for mapping response to list of all ingredient fields
-    private fun RecipeItemResponse.mapToIngredients(): List<Ingredient> {
+    private fun Result.mapToIngredients(): List<Ingredient> {
         val ingredients = mutableListOf<Ingredient>()
 
         createIngredient(strIngredient1, strMeasure1)?.let { ingredient ->

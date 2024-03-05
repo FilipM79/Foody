@@ -1,6 +1,6 @@
 package com.example.foody.shared.data
 
-import com.example.foody.search.data.model.RecipeSearchResponse
+import com.example.foody.search.data.model.RecipesSearchResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -15,51 +15,51 @@ import retrofit2.http.Query
 // It communicates with recipes REST API theMealDb (RE-presentational, S-tate, T-ransfer)
 // It contains all separate endpoint functions for different endpoint calls for each CRUD operations
 // we can use these suspend functions or not
-interface FoodRecipesApi {
+interface RecipesApi {
     @GET("/api/json/v1/1/search.php")
     suspend fun search(
         @Query("s") searchTerm: String
-    ) : Response<RecipeSearchResponse>
+    ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/lookup.php")
     suspend fun getRecipeDetails(
         @Query("i") recipeId: String
-    ) : Response<RecipeSearchResponse>
+    ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/search.php")
     suspend fun listAllMealsByLetter(
         @Query("f") letter: String
-    ) : Response<RecipeSearchResponse>
+    ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/random.php")
-    suspend fun singleRandomMeal() : Response<RecipeSearchResponse>
+    suspend fun singleRandomMeal() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/categories.php")
-    suspend fun listDetailedMealCategories() : Response<RecipeSearchResponse>
+    suspend fun listDetailedMealCategories() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/list.php?c=list")
-    suspend fun listAllMealCategories() : Response<RecipeSearchResponse>
+    suspend fun listAllMealCategories() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/list.php?a=list")
-    suspend fun listAllAreas() : Response<RecipeSearchResponse>
+    suspend fun listAllAreas() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/list.php?i=list")
-    suspend fun listAllIngredients() : Response<RecipeSearchResponse>
+    suspend fun listAllIngredients() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/filter.php")
     suspend fun filterAllMealsByMainIngredient(
         @Query("i") mainIngredient: String
-    ) : Response<RecipeSearchResponse>
+    ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/filter.php")
     suspend fun filterAllMealsByCategory(
         @Query("c") category: String
-    ) : Response<RecipeSearchResponse>
+    ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/filter.php")
     suspend fun filterAllMealsByArea(
         @Query("a") area: String
-    ) : Response<RecipeSearchResponse>
+    ) : Response<RecipesSearchResponse>
 
     // www.themealdb.com/images/ingredients/Lime.png
 

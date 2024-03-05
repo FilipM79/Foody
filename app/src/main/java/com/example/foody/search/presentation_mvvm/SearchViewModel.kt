@@ -2,7 +2,7 @@ package com.example.foody.search.presentation_mvvm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.foody.search.domain.FoodRecipesSearchRepository
+import com.example.foody.search.domain.RecipesSearchRepository
 import com.example.foody.search.presentation_mvvm.model.SearchScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +10,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: FoodRecipesSearchRepository,
+    private val repository: RecipesSearchRepository,
 ): ViewModel() {
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
