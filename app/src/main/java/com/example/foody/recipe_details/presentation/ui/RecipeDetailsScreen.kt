@@ -75,10 +75,10 @@ fun RecipeDetailsScreen(
 }
 
 @Composable
-fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
+private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
 
 @Composable
-fun RecipeDetailsItem(item: RecipeInfo) {
+private fun RecipeDetailsItem(item: RecipeInfo) {
     Column() {
         RecipeTitleText(title = item.title)
         Column(
@@ -140,7 +140,7 @@ fun RecipeTitleText(title: String) {
 }
 
 @Composable
-fun RecipeImage(imageUrl: String) {
+private fun RecipeImage(imageUrl: String) {
     AsyncImage(
         model = imageUrl,
         contentDescription = null,
@@ -155,7 +155,7 @@ fun RecipeImage(imageUrl: String) {
 }
 
 @Composable
-fun TextItem(item: String, fieldTitle: String) {
+private fun TextItem(item: String, fieldTitle: String) {
     Text(
         text = "$fieldTitle: $item",
         style = MaterialTheme.typography.bodyMedium,
@@ -170,7 +170,7 @@ fun TextItem(item: String, fieldTitle: String) {
 }
 
 @Composable
-fun RecipeText(recipeText: String, fieldTitle: String) {
+private fun RecipeText(recipeText: String, fieldTitle: String) {
     Text(
         text = "$fieldTitle:\n$recipeText",
         style = MaterialTheme.typography.bodyMedium,
@@ -184,7 +184,7 @@ fun RecipeText(recipeText: String, fieldTitle: String) {
 }
 
 @Composable
-fun Ingredients(ingredients: List<Ingredient>) {
+private fun Ingredients(ingredients: List<Ingredient>) {
     Column() {
         Text(
             text = "\nIngredients:\n",

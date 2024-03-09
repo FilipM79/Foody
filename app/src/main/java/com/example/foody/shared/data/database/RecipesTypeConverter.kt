@@ -8,7 +8,7 @@ import com.google.gson.reflect.TypeToken
 // we can not store complex objects in local database directly, so we need to convert them to String
 class RecipesTypeConverter {
 
-    private var gson = Gson()
+    private val gson = Gson()
 
     @TypeConverter
     fun recipeToString(recipe: RecipesSearchResponse): String {
