@@ -1,16 +1,13 @@
 package com.example.foody.recipe_details.presentation.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,7 +23,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -34,37 +30,33 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.foody.R
 import com.example.foody.recipe_details.presentation.RecipeDetailsViewModel
 import com.example.foody.recipe_details.presentation.model.RecipeInfoState
 import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.shared.util.Constants
 
-// 1-st way to get recipeId from previous Fragment is via LaunchedEffect.
-// Because in here we only do this once
-// 2-nd way would be to pass a viewModel to Fragment directly
-// 3-rd way is via remember block for the same reason as in 1-st
-//    rememberSaveable { recipeViewModel.getRecipeDetails(recipeId) }
-// 4-th way would be via SavedStateHandle
-// 5-th way would be via Custom State Handler Implementation
+// Passing the recipeId (coming from previous screen) to ViewModel:
+// 1-st way is to set it (or use it) from here (Compose) via exposed public ViewModel function,
+//  but in a way which makes sure it is only called once (and not on every composition):
+//   - LaunchedEffect(key1 = recipeId) { recipeViewModel.getRecipeDetails(recipeId) }, or
+//   - rememberSaveable { recipeViewModel.getRecipeDetails(recipeId) }
+// 2-nd way is to inject the viewModel into Fragment and pass it to Compose function,
+//    and before passing it to set the recipeId (will be once),
+//    or to use assisted injection, since it is available from Fragment injection
+//    (assisted injection for Compose hiltViewModel function is also coming soon).
+// 3-rd - via SavedStateHandle (which is available to ViewModel, so doesn't need assisted inject)
+// 4-th - via custom state handler implementation - some singleton class
+//  with responsibility to hold the state until passed, and clear it once consumed.
 @Composable
 fun RecipeDetailsScreen(
-    recipeId: String,
-    recipeViewModel: RecipeDetailsViewModel = hiltViewModel()
+    recipeViewModel: RecipeDetailsViewModel //= hiltViewModel() assisted inject coming soon.
 ) {
-    // 1-st way
-    LaunchedEffect(key1 = recipeId) {
-        recipeViewModel.getRecipeDetails(recipeId)
-    }
-
     val state by recipeViewModel.state.collectAsState()
 
     when (val detailsState = state.detailsState) {
