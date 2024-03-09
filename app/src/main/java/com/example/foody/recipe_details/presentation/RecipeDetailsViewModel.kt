@@ -5,23 +5,30 @@ import androidx.lifecycle.viewModelScope
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.recipe_details.presentation.model.RecipeDetailsState
 import com.example.foody.recipe_details.presentation.model.RecipeInfoState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-@HiltViewModel
-class RecipeDetailsViewModel @Inject constructor(
-    private val repository: RecipeDetailsSearchRepository,
-): ViewModel() {
+@HiltViewModel(assistedFactory = RecipeDetailsViewModelFactory::class)
+class RecipeDetailsViewModel @AssistedInject constructor(
+    @Assisted private val recipeId: String,
+    private val repository: RecipeDetailsSearchRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(RecipeDetailsState.initialValue)
-    val state : StateFlow<RecipeDetailsState> = _state
+    val state: StateFlow<RecipeDetailsState> = _state
 
-    fun getRecipeDetails(recipeId: String) {
+    init {
+        getRecipeDetails()
+    }
+
+    private fun getRecipeDetails() {
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 _state.emit(_state.value.copy(detailsState = RecipeInfoState.RecipeInfoLoading))
@@ -39,4 +46,9 @@ class RecipeDetailsViewModel @Inject constructor(
             }
         }
     }
+}
+
+@AssistedFactory
+interface RecipeDetailsViewModelFactory {
+    fun create(recipeId: String): RecipeDetailsViewModel
 }

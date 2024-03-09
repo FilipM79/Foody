@@ -35,13 +35,11 @@ class RecipeDetailsViewModelTest {
         Dispatchers.setMain(dispatcher)
 
         repoMock = mockk()
-
-        subject = RecipeDetailsViewModel(repoMock)
     }
 
     @Test
     fun `test Given we land on recipe detail screen, Then recipe details of that recipe are fetched`() {
-        subject.getRecipeDetails(testRecipeId)
+        createViewModel()
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
     }
@@ -49,9 +47,9 @@ class RecipeDetailsViewModelTest {
 
     @Test
     fun `test Given we land on recipe detail screen, On a call to fetch recipe details, Then the loading is shown`() {
-        subject.getRecipeDetails(testRecipeId)
+        createViewModel()
 
-        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState as RecipeInfoState.RecipeInfoLoading)
+        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
     }
 
     @Test
@@ -59,7 +57,9 @@ class RecipeDetailsViewModelTest {
         val testRecipeInfo = getRecipeInfoTestData(testRecipeId)
         coEvery { repoMock.getRecipeDetails(testRecipeId) } returns testRecipeInfo
 
-        subject.getRecipeDetails(testRecipeId)
+        createViewModel()
+
+        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
 
@@ -70,7 +70,9 @@ class RecipeDetailsViewModelTest {
     fun `test Given we land on recipe detail screen, On recipe details fail to fetch, When error message is null, Then the generic error is shown`() {
         coEvery { repoMock.getRecipeDetails(testRecipeId) } throws IOException()
 
-        subject.getRecipeDetails(testRecipeId)
+        createViewModel()
+
+        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
 
@@ -82,7 +84,9 @@ class RecipeDetailsViewModelTest {
         val errorMessage = "error message"
         coEvery { repoMock.getRecipeDetails(testRecipeId) } throws IOException(errorMessage)
 
-        subject.getRecipeDetails(testRecipeId)
+        createViewModel()
+
+        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
 
@@ -92,5 +96,9 @@ class RecipeDetailsViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    private fun createViewModel() {
+        subject = RecipeDetailsViewModel(testRecipeId, repoMock)
     }
 }
