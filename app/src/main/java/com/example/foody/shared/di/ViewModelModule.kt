@@ -2,7 +2,7 @@ package com.example.foody.shared.di
 
 import com.example.foody.shared.data.RecipesApiService
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
-import com.example.foody.search.domain.RecipesSearchRepository
+import com.example.foody.recipe_search.domain.RecipesSearchRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

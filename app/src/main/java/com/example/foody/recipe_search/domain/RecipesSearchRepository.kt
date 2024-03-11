@@ -1,4 +1,4 @@
-package com.example.foody.search.domain
+package com.example.foody.recipe_search.domain
 
 import com.example.foody.shared.domain.model.RecipeInfo
 

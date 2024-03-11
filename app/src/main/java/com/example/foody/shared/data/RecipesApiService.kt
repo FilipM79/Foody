@@ -3,10 +3,10 @@ package com.example.foody.shared.data
 import android.util.Log
 import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
-import com.example.foody.search.domain.RecipesSearchRepository
+import com.example.foody.recipe_search.domain.RecipesSearchRepository
 import com.example.foody.shared.domain.model.Result
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
-import com.example.foody.search.data.model.RecipesSearchResponse
+import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
 import retrofit2.Retrofit
 import java.io.IOException

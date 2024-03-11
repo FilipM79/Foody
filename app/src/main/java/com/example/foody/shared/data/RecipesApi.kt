@@ -1,6 +1,6 @@
 package com.example.foody.shared.data
 
-import com.example.foody.search.data.model.RecipesSearchResponse
+import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

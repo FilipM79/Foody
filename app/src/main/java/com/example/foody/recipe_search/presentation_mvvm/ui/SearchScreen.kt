@@ -1,4 +1,4 @@
-package com.example.foody.search.presentation_mvvm.ui
+package com.example.foody.recipe_search.presentation_mvvm.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -40,9 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.foody.search.presentation_mvvm.SearchNavigationEvent
-import com.example.foody.search.presentation_mvvm.SearchViewModel
-import com.example.foody.search.presentation_mvvm.model.SearchScreenState
+import com.example.foody.recipe_search.presentation_mvvm.SearchNavigationEvent
+import com.example.foody.recipe_search.presentation_mvvm.SearchViewModel
+import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
 import com.example.foody.shared.domain.model.RecipeInfo
 
 // 12-th step

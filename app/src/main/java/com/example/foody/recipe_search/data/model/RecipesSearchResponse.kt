@@ -1,4 +1,4 @@
-package com.example.foody.search.data.model
+package com.example.foody.recipe_search.data.model
 
 import com.example.foody.shared.domain.model.Result
 import com.google.gson.annotations.SerializedName

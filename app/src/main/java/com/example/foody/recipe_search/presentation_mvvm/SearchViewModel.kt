@@ -1,9 +1,9 @@
-package com.example.foody.search.presentation_mvvm
+package com.example.foody.recipe_search.presentation_mvvm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.foody.search.domain.RecipesSearchRepository
-import com.example.foody.search.presentation_mvvm.model.SearchScreenState
+import com.example.foody.recipe_search.domain.RecipesSearchRepository
+import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -46,6 +46,7 @@ class SearchViewModel @Inject constructor(
             withContext(Dispatchers.Main) {// povratak na main thread ...
                 _state.emit(_state.value.copy(recipes = mealList))
             }
+
         }
     }
 

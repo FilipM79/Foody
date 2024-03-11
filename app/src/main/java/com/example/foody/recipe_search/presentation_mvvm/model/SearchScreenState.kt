@@ -1,4 +1,4 @@
-package com.example.foody.search.presentation_mvvm.model
+package com.example.foody.recipe_search.presentation_mvvm.model
 
 import com.example.foody.shared.domain.model.RecipeInfo
 

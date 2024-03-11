@@ -1,7 +1,7 @@
 package com.example.foody.shared.data.database
 
 import androidx.room.TypeConverter
-import com.example.foody.search.data.model.RecipesSearchResponse
+import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
