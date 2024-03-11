@@ -1,8 +1,10 @@
 package com.example.foody.recipe_search.presentation_mvvm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foody.recipe_search.domain.RecipesSearchRepository
+import com.example.foody.recipe_search.presentation_mvvm.model.RecipeSearchState
 import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -40,13 +42,22 @@ class SearchViewModel @Inject constructor(
         // ovako smo uradili radi efikasnijeg koriscenja memorije
         // (i zato sto zelimo da ostavimo ostale eventualne delove state-a nepromenjene)
 
-        viewModelScope.launch(Dispatchers.IO) {  // prelazak na IO thread
-            val mealList = repository.search(state.value.searchTerm)
+        viewModelScope.launch {  // prelazak na IO thread
 
-            withContext(Dispatchers.Main) {// povratak na main thread ...
-                _state.emit(_state.value.copy(recipes = mealList))
+            _state.emit(_state.value.copy(searchState = RecipeSearchState.RecipeSearchLoading))
+
+            val newRecipeSearchState: RecipeSearchState = try {
+                val mealList = withContext(Dispatchers.IO) {
+                    repository.search(state.value.searchTerm)
+                }
+                if (mealList.isEmpty()) RecipeSearchState.RecipeSearchEmpty
+                else RecipeSearchState.RecipeSearchSuccess(mealList = mealList)
+            } catch (e: Exception) {
+                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
+                RecipeSearchState.RecipeSearchError("Unknown error from search.")
             }
 
+            _state.emit(_state.value.copy(searchState = newRecipeSearchState))
         }
     }
 

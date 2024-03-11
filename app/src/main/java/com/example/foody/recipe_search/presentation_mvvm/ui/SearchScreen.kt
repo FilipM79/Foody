@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -19,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -41,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.foody.recipe_search.presentation_mvvm.SearchNavigationEvent
 import com.example.foody.recipe_search.presentation_mvvm.SearchViewModel
+import com.example.foody.recipe_search.presentation_mvvm.model.RecipeSearchState
 import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
 import com.example.foody.shared.domain.model.RecipeInfo
 
@@ -82,24 +85,25 @@ fun SearchScreen(
 }
 
 @Composable
-private fun SearchScreenContent(
-    state: SearchScreenState,
-    performSearch: () -> Unit,
+private fun EmptySearchResult() {
+    Text(text = "There are no results for this search term. Please try something else.")
+}
+
+@Composable
+private fun SearchSuccess(
+    mealList: List<RecipeInfo>,
     navigateWith: (recipeId: String) -> Unit,
-    onValueChanged: (searchTerm: String) -> Unit
 ) {
     LazyVerticalGrid(
         contentPadding = PaddingValues(8.dp),
         columns = GridCells.Adaptive(240.dp),
         content = {
-            item {
-                SearchTextFieldAndButton(state, performSearch, onValueChanged)
-            }
+
             items(
-                count = state.recipes.size,
-                key = { index -> state.recipes[index].id } // ???
+                count = mealList.size,
+                key = { index -> mealList[index].id } // ???
             ) {
-                RecipeItem(item = state.recipes[it]) { recipeId ->
+                RecipeItem(item = mealList[it]) { recipeId ->
                     // ovako idemo preko viewModel-a
                     // ovo nam salje jedan event (Channel.send())
                     navigateWith(recipeId)
@@ -107,6 +111,37 @@ private fun SearchScreenContent(
             }
         }
     )
+}
+
+@Composable
+private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
+
+@Composable
+private fun SearchScreenContent(
+    state: SearchScreenState,
+    performSearch: () -> Unit,
+    navigateWith: (recipeId: String) -> Unit,
+    onValueChanged: (searchTerm: String) -> Unit
+) {
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        SearchTextFieldAndButton(state, performSearch, onValueChanged)
+        when (state.searchState) {
+            is RecipeSearchState.RecipeSearchIdle -> Unit
+            is RecipeSearchState.RecipeSearchEmpty -> EmptySearchResult()
+            is RecipeSearchState.RecipeSearchLoading -> CircularProgressIndicator(
+                modifier = Modifier.requiredSize(72.dp),
+                strokeWidth = 8.dp
+            )
+
+            is RecipeSearchState.RecipeSearchSuccess -> SearchSuccess(
+                state.searchState.mealList,
+                navigateWith
+            )
+
+            is RecipeSearchState.RecipeSearchError -> ErrorMessage(errorMessage = state.searchState.message)
+        }
+    }
 }
 
 @Composable
@@ -169,11 +204,12 @@ private fun RecipeTitle(title: String) {
         modifier = Modifier
             .clip(shape = RoundedCornerShape(12.dp))
             .fillMaxWidth()
-            .background(brush = Brush.verticalGradient(
-                0f to Color.White,
-                1f to Color.Gray,
-                startY = 20f,
-                endY = 80.0f
+            .background(
+                brush = Brush.verticalGradient(
+                    0f to Color.White,
+                    1f to Color.Gray,
+                    startY = 20f,
+                    endY = 80.0f
                 ), alpha = 0.8f
             )
             .padding(8.dp),
@@ -199,10 +235,10 @@ private fun RecipeImage(imageUrl: String) {
 @Composable
 @Preview
 private fun Preview() {
-    SearchScreenContent(
-        state = SearchScreenState(searchTerm = "", recipes = emptyList()),
-        performSearch = { Unit },
-        navigateWith = { Unit },
-        onValueChanged = { Unit },
-    )
+//    SearchScreenContent(
+//        state = SearchScreenState(searchTerm = "", recipes = emptyList()),
+//        performSearch = { Unit },
+//        navigateWith = { Unit },
+//        onValueChanged = { Unit },
+//    )
 }
