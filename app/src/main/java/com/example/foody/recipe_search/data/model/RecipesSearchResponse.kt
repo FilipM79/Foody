@@ -1,6 +1,6 @@
-package com.example.foody.search.data.model
+package com.example.foody.recipe_search.data.model
 
-import com.example.foody.shared.domain.model.RecipeItemResponse
+import com.example.foody.shared.domain.model.RecipeResult
 import com.google.gson.annotations.SerializedName
 
 // 3-rd step
@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName
 // 13.RecipesFragment, 14.MainActivity)
 
 // This is the data class with the list of possible search items we could get from Api
-data class RecipeSearchResponse(
+data class RecipesSearchResponse(
     @SerializedName("meals")
-    val recipes: List<RecipeItemResponse>?
+    val recipes: List<RecipeResult>?
 )

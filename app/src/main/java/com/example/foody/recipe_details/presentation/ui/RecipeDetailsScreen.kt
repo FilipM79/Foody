@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -62,17 +63,20 @@ fun RecipeDetailsScreen(
     val state by recipeViewModel.state.collectAsState()
 
     when (val detailsState = state.detailsState) {
-        is RecipeInfoState.RecipeInfoValue -> RecipeDetailsItem(item = detailsState.recipeDetails)
-        is RecipeInfoState.RecipeInfoLoading -> CircularProgressIndicator()
-        is RecipeInfoState.RecipeInfoError -> ErrorMessage(errorMessage = detailsState.message)
+        is RecipeInfoState.Value -> RecipeDetailsItem(item = detailsState.recipeDetails)
+        is RecipeInfoState.Loading -> CircularProgressIndicator(
+            modifier = Modifier.requiredSize(72.dp),
+            strokeWidth = 8.dp
+        )
+        is RecipeInfoState.Error -> ErrorMessage(errorMessage = detailsState.message)
     }
 }
 
 @Composable
-fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
+private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
 
 @Composable
-fun RecipeDetailsItem(item: RecipeInfo) {
+private fun RecipeDetailsItem(item: RecipeInfo) {
     Column {
         RecipeTitleText(title = item.title)
         Column(
@@ -134,7 +138,7 @@ fun RecipeTitleText(title: String) {
 }
 
 @Composable
-fun RecipeImage(imageUrl: String) {
+private fun RecipeImage(imageUrl: String) {
     AsyncImage(
         model = imageUrl,
         contentDescription = null,
@@ -149,7 +153,7 @@ fun RecipeImage(imageUrl: String) {
 }
 
 @Composable
-fun TextItem(item: String, fieldTitle: String) {
+private fun TextItem(item: String, fieldTitle: String) {
     Text(
         text = "$fieldTitle: $item",
         style = MaterialTheme.typography.bodyMedium,
@@ -164,7 +168,7 @@ fun TextItem(item: String, fieldTitle: String) {
 }
 
 @Composable
-fun RecipeText(recipeText: String, fieldTitle: String) {
+private fun RecipeText(recipeText: String, fieldTitle: String) {
     Text(
         text = "$fieldTitle:\n$recipeText",
         style = MaterialTheme.typography.bodyMedium,
@@ -178,7 +182,7 @@ fun RecipeText(recipeText: String, fieldTitle: String) {
 }
 
 @Composable
-fun Ingredients(ingredients: List<Ingredient>) {
+private fun Ingredients(ingredients: List<Ingredient>) {
     Column {
         Text(
             text = "\nIngredients:\n",
