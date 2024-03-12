@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName
 // 13.RecipesFragment, 14.MainActivity)
 
 // This class is made from a single json api item and it contains all the properties of one item
-data class RecipeItemResponse(
+data class RecipeResult(
     @SerializedName("dateModified")
     val dateModified: String?,
     @SerializedName("idMeal")

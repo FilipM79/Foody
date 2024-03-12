@@ -1,8 +1,8 @@
 package com.example.foody.shared.di
 
-import com.example.foody.shared.data.FoodRecipesApiService
+import com.example.foody.shared.data.RecipesApiService
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
-import com.example.foody.search.domain.FoodRecipesSearchRepository
+import com.example.foody.recipe_search.domain.RecipesSearchRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,12 +22,12 @@ object ViewModelModule {
     @Provides
     @ViewModelScoped
     fun provideFoodRecipesSearchRepository(
-        apiService: FoodRecipesApiService
-    ): FoodRecipesSearchRepository = apiService
+        apiService: RecipesApiService
+    ): RecipesSearchRepository = apiService
 
     @Provides
     @ViewModelScoped
     fun provideRecipeDetailsSearchRepository(
-        apiService: FoodRecipesApiService
+        apiService: RecipesApiService
     ): RecipeDetailsSearchRepository = apiService
 }

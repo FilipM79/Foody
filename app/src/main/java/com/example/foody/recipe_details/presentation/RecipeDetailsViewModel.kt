@@ -15,8 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// providing a view model factory class to HiltViewModel in order to get args from RecipeFragment
+// via goToDetailsScreen (navigating with args)
 @HiltViewModel(assistedFactory = RecipeDetailsViewModelFactory::class)
 class RecipeDetailsViewModel @AssistedInject constructor(
+    // defining hilt how to obtain args via assisted injection
     @Assisted private val recipeId: String,
     private val repository: RecipeDetailsSearchRepository
 ) : ViewModel() {
@@ -25,20 +28,21 @@ class RecipeDetailsViewModel @AssistedInject constructor(
     val state: StateFlow<RecipeDetailsState> = _state
 
     init {
+        // getting recipe details when instantiating a viewmodel
         getRecipeDetails()
     }
 
     private fun getRecipeDetails() {
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
-                _state.emit(_state.value.copy(detailsState = RecipeInfoState.RecipeInfoLoading))
+                _state.emit(_state.value.copy(detailsState = RecipeInfoState.Loading))
             }
 
             val newState = try {
                 val recipeDetails = repository.getRecipeDetails(recipeId = recipeId)
-                RecipeInfoState.RecipeInfoValue(recipeDetails)
+                RecipeInfoState.Value(recipeDetails)
             } catch (e: Exception) {
-                RecipeInfoState.RecipeInfoError(e.message ?: "Unknown error from RecipeDetailsVM")
+                RecipeInfoState.Error(e.message ?: "Unknown error from RecipeDetailsVM")
             }
 
             withContext(Dispatchers.Main) {
@@ -48,6 +52,8 @@ class RecipeDetailsViewModel @AssistedInject constructor(
     }
 }
 
+// this recipeId is defined when we instantiate a viewmodel in RecipeDetailsFragment via
+// factory.create in extrasProducer
 @AssistedFactory
 interface RecipeDetailsViewModelFactory {
     fun create(recipeId: String): RecipeDetailsViewModel

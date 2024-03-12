@@ -1,16 +1,17 @@
-package com.example.foody.search.presentation_mvvm
+package com.example.foody.recipe_search.presentation_mvvm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.foody.search.domain.FoodRecipesSearchRepository
-import com.example.foody.search.presentation_mvvm.model.SearchScreenState
+import com.example.foody.recipe_search.domain.RecipesSearchRepository
+import com.example.foody.recipe_search.presentation_mvvm.model.RecipeSearchState
+import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: FoodRecipesSearchRepository,
+    private val repository: RecipesSearchRepository,
 ): ViewModel() {
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
@@ -41,12 +42,22 @@ class SearchViewModel @Inject constructor(
         // ovako smo uradili radi efikasnijeg koriscenja memorije
         // (i zato sto zelimo da ostavimo ostale eventualne delove state-a nepromenjene)
 
-        viewModelScope.launch(Dispatchers.IO) {  // prelazak na IO thread
-            val mealList = repository.search(state.value.searchTerm)
+        viewModelScope.launch {  // prelazak na IO thread
 
-            withContext(Dispatchers.Main) {// povratak na main thread ...
-                _state.emit(_state.value.copy(recipes = mealList))
+            _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
+
+            val newRecipeSearchState: RecipeSearchState = try {
+                val mealList = withContext(Dispatchers.IO) {
+                    repository.search(state.value.searchTerm)
+                }
+                if (mealList.isEmpty()) RecipeSearchState.Empty
+                else RecipeSearchState.Success(mealList = mealList)
+            } catch (e: Exception) {
+                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
+                RecipeSearchState.Error("Unknown error from search.")
             }
+
+            _state.emit(_state.value.copy(recipeSearchState = newRecipeSearchState))
         }
     }
 

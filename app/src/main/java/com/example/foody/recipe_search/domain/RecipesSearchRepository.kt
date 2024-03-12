@@ -1,4 +1,4 @@
-package com.example.foody.search.domain
+package com.example.foody.recipe_search.domain
 
 import com.example.foody.shared.domain.model.RecipeInfo
 
@@ -9,6 +9,6 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 13.RecipesFragment, 14.MainActivity)
 
 // In this interface we define a search function which returns a list of recipes
-interface FoodRecipesSearchRepository {
+interface RecipesSearchRepository {
     suspend fun search(searchTerm: String) : List<RecipeInfo>
 }

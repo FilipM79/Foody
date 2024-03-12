@@ -49,7 +49,7 @@ class RecipeDetailsViewModelTest {
     fun `test Given we land on recipe detail screen, On a call to fetch recipe details, Then the loading is shown`() {
         createViewModel()
 
-        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Loading, subject.state.value.detailsState)
     }
 
     @Test
@@ -59,11 +59,11 @@ class RecipeDetailsViewModelTest {
 
         createViewModel()
 
-        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Loading, subject.state.value.detailsState)
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
 
-        assertEquals(RecipeInfoState.RecipeInfoValue(testRecipeInfo), subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Value(testRecipeInfo), subject.state.value.detailsState)
     }
 
     @Test
@@ -72,11 +72,11 @@ class RecipeDetailsViewModelTest {
 
         createViewModel()
 
-        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Loading, subject.state.value.detailsState)
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
 
-        assertEquals(RecipeInfoState.RecipeInfoError("Unknown error from RecipeDetailsVM"), subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Error("Unknown error from RecipeDetailsVM"), subject.state.value.detailsState)
     }
 
     @Test
@@ -86,11 +86,11 @@ class RecipeDetailsViewModelTest {
 
         createViewModel()
 
-        assertEquals(RecipeInfoState.RecipeInfoLoading, subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Loading, subject.state.value.detailsState)
 
         coVerify { repoMock.getRecipeDetails(testRecipeId) }
 
-        assertEquals(RecipeInfoState.RecipeInfoError(errorMessage), subject.state.value.detailsState)
+        assertEquals(RecipeInfoState.Error(errorMessage), subject.state.value.detailsState)
     }
 
     @After
