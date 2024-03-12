@@ -35,14 +35,14 @@ class RecipeDetailsViewModel @AssistedInject constructor(
     private fun getRecipeDetails() {
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
-                _state.emit(_state.value.copy(detailsState = RecipeInfoState.RecipeInfoLoading))
+                _state.emit(_state.value.copy(detailsState = RecipeInfoState.Loading))
             }
 
             val newState = try {
                 val recipeDetails = repository.getRecipeDetails(recipeId = recipeId)
-                RecipeInfoState.RecipeInfoValue(recipeDetails)
+                RecipeInfoState.Value(recipeDetails)
             } catch (e: Exception) {
-                RecipeInfoState.RecipeInfoError(e.message ?: "Unknown error from RecipeDetailsVM")
+                RecipeInfoState.Error(e.message ?: "Unknown error from RecipeDetailsVM")
             }
 
             withContext(Dispatchers.Main) {

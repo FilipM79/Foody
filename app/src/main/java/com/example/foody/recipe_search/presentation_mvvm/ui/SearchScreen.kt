@@ -126,20 +126,20 @@ private fun SearchScreenContent(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SearchTextFieldAndButton(state, performSearch, onValueChanged)
-        when (state.searchState) {
-            is RecipeSearchState.RecipeSearchIdle -> Unit
-            is RecipeSearchState.RecipeSearchEmpty -> EmptySearchResult()
-            is RecipeSearchState.RecipeSearchLoading -> CircularProgressIndicator(
+        when (state.recipeSearchState) {
+            is RecipeSearchState.Idle -> Unit
+            is RecipeSearchState.Empty -> EmptySearchResult()
+            is RecipeSearchState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp),
                 strokeWidth = 8.dp
             )
 
-            is RecipeSearchState.RecipeSearchSuccess -> SearchSuccess(
-                state.searchState.mealList,
+            is RecipeSearchState.Success -> SearchSuccess(
+                state.recipeSearchState.mealList,
                 navigateWith
             )
 
-            is RecipeSearchState.RecipeSearchError -> ErrorMessage(errorMessage = state.searchState.message)
+            is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
         }
     }
 }
@@ -235,10 +235,10 @@ private fun RecipeImage(imageUrl: String) {
 @Composable
 @Preview
 private fun Preview() {
-//    SearchScreenContent(
-//        state = SearchScreenState(searchTerm = "", recipes = emptyList()),
-//        performSearch = { Unit },
-//        navigateWith = { Unit },
-//        onValueChanged = { Unit },
-//    )
+    SearchScreenContent(
+        state = SearchScreenState.initialValue,
+        performSearch = { },
+        navigateWith = { },
+        onValueChanged = { },
+    )
 }

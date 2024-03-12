@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -63,12 +61,12 @@ fun RecipeDetailsScreen(
     val state by recipeViewModel.state.collectAsState()
 
     when (val detailsState = state.detailsState) {
-        is RecipeInfoState.RecipeInfoValue -> RecipeDetailsItem(item = detailsState.recipeDetails)
-        is RecipeInfoState.RecipeInfoLoading -> CircularProgressIndicator(
+        is RecipeInfoState.Value -> RecipeDetailsItem(item = detailsState.recipeDetails)
+        is RecipeInfoState.Loading -> CircularProgressIndicator(
             modifier = Modifier.requiredSize(72.dp),
             strokeWidth = 8.dp
         )
-        is RecipeInfoState.RecipeInfoError -> ErrorMessage(errorMessage = detailsState.message)
+        is RecipeInfoState.Error -> ErrorMessage(errorMessage = detailsState.message)
     }
 }
 

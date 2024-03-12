@@ -4,13 +4,13 @@ import com.example.foody.shared.domain.model.RecipeInfo
 
 data class RecipeDetailsState(val detailsState: RecipeInfoState) {
     companion object {
-        val initialValue = RecipeDetailsState(RecipeInfoState.RecipeInfoLoading)
+        val initialValue = RecipeDetailsState(RecipeInfoState.Loading)
     }
 }
 
 sealed class RecipeInfoState {
-    data object RecipeInfoLoading: RecipeInfoState()
-    data class RecipeInfoValue(val recipeDetails: RecipeInfo): RecipeInfoState()
-    data class RecipeInfoError(val message: String) : RecipeInfoState()
+    data object Loading: RecipeInfoState()
+    data class Value(val recipeDetails: RecipeInfo): RecipeInfoState()
+    data class Error(val message: String) : RecipeInfoState()
 }
 

@@ -44,20 +44,20 @@ class SearchViewModel @Inject constructor(
 
         viewModelScope.launch {  // prelazak na IO thread
 
-            _state.emit(_state.value.copy(searchState = RecipeSearchState.RecipeSearchLoading))
+            _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
 
             val newRecipeSearchState: RecipeSearchState = try {
                 val mealList = withContext(Dispatchers.IO) {
                     repository.search(state.value.searchTerm)
                 }
-                if (mealList.isEmpty()) RecipeSearchState.RecipeSearchEmpty
-                else RecipeSearchState.RecipeSearchSuccess(mealList = mealList)
+                if (mealList.isEmpty()) RecipeSearchState.Empty
+                else RecipeSearchState.Success(mealList = mealList)
             } catch (e: Exception) {
                 Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
-                RecipeSearchState.RecipeSearchError("Unknown error from search.")
+                RecipeSearchState.Error("Unknown error from search.")
             }
 
-            _state.emit(_state.value.copy(searchState = newRecipeSearchState))
+            _state.emit(_state.value.copy(recipeSearchState = newRecipeSearchState))
         }
     }
 

@@ -9,16 +9,16 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 13.RecipesFragment, 14.MainActivity)
 
 // What do we do here?
-data class SearchScreenState(val searchTerm: String, val searchState: RecipeSearchState) {
+data class SearchScreenState(val searchTerm: String, val recipeSearchState: RecipeSearchState) {
     companion object {
-        val initialValue = SearchScreenState("", RecipeSearchState.RecipeSearchIdle)
+        val initialValue = SearchScreenState("", RecipeSearchState.Idle)
     }
 }
 
 sealed class RecipeSearchState {
-    data object RecipeSearchIdle : RecipeSearchState()
-    data object RecipeSearchEmpty : RecipeSearchState()
-    data object RecipeSearchLoading: RecipeSearchState()
-    data class RecipeSearchSuccess(val mealList: List<RecipeInfo>): RecipeSearchState()
-    data class RecipeSearchError(val message: String) : RecipeSearchState()
+    data object Idle : RecipeSearchState()
+    data object Empty : RecipeSearchState()
+    data object Loading: RecipeSearchState()
+    data class Success(val mealList: List<RecipeInfo>): RecipeSearchState()
+    data class Error(val message: String) : RecipeSearchState()
 }

@@ -4,7 +4,7 @@ import android.util.Log
 import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
 import com.example.foody.recipe_search.domain.RecipesSearchRepository
-import com.example.foody.shared.domain.model.Result
+import com.example.foody.shared.domain.model.RecipeResult
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -91,7 +91,7 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     }
 
     // Making extension function for mapping response to list of all ingredient fields
-    private fun Result.mapToIngredients(): List<Ingredient> {
+    private fun RecipeResult.mapToIngredients(): List<Ingredient> {
         val ingredients = mutableListOf<Ingredient>()
 
         createIngredient(strIngredient1, strMeasure1)?.let { ingredient ->
