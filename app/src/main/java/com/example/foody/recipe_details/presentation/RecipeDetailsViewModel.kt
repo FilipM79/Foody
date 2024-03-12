@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.recipe_details.presentation.model.RecipeDetailsState
 import com.example.foody.recipe_details.presentation.model.RecipeInfoState
+import com.example.foody.shared.presentation.AssistedViewModelFactory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -55,6 +56,4 @@ class RecipeDetailsViewModel @AssistedInject constructor(
 // this recipeId is defined when we instantiate a viewmodel in RecipeDetailsFragment via
 // factory.create in extrasProducer
 @AssistedFactory
-interface RecipeDetailsViewModelFactory {
-    fun create(recipeId: String): RecipeDetailsViewModel
-}
+interface RecipeDetailsViewModelFactory : AssistedViewModelFactory<RecipeDetailsViewModel, String>
