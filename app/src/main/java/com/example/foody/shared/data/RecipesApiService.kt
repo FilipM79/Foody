@@ -8,6 +8,7 @@ import com.example.foody.shared.domain.model.RecipeResult
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
+import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.IOException
 import javax.inject.Inject
@@ -46,7 +47,19 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
             throw IOException("${response.code()}, ${response.message()}")
         }
     }
-
+    
+    // trying to override a fun for a single random recipe
+    override suspend fun singleRandomMeal(): List<RecipeInfo> {
+        val response = service.singleRandomMeal()
+        if (response.isSuccessful) {
+            return response.body()?.mapToInfoList()
+                ?: throw NullPointerException("Search response body is null.")
+        } else {
+            handleError(response.code(), response.message())
+            throw IOException("${response.code()}, ${response.message()}")
+        }
+    }
+    
     private fun handleError(code: Int, errorMessage: String) {
         Log.e(TAG, "$code, $errorMessage")
     }

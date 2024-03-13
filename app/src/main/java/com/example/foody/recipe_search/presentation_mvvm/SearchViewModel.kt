@@ -60,6 +60,27 @@ class SearchViewModel @Inject constructor(
             _state.emit(_state.value.copy(recipeSearchState = newRecipeSearchState))
         }
     }
+    
+    // added for a random recipe
+    fun randomRecipe() {
+        viewModelScope.launch {
+        
+            _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
+        
+            val randomRecipeSearchState: RecipeSearchState = try {
+                val mealList = withContext(Dispatchers.IO) {
+                    repository.singleRandomMeal()
+                }
+                if (mealList.isEmpty()) RecipeSearchState.Empty
+                else RecipeSearchState.Success(mealList = mealList)
+            } catch (e: Exception) {
+                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
+                RecipeSearchState.Error("Unknown error from search.")
+            }
+        
+            _state.emit(_state.value.copy(recipeSearchState = randomRecipeSearchState))
+        }
+    }
 
     fun updateSearchTerm(searchTerm: String) {
         viewModelScope.launch {

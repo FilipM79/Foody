@@ -9,7 +9,7 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 13.RecipesFragment, 14.MainActivity)
 
 // What do we do here?
-data class SearchScreenState(val searchTerm: String, val recipeSearchState: RecipeSearchState) {
+data class SearchScreenState(var searchTerm: String, val recipeSearchState: RecipeSearchState) {
     companion object {
         val initialValue = SearchScreenState("", RecipeSearchState.Idle)
     }

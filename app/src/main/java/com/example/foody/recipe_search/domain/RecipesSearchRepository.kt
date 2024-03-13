@@ -1,6 +1,8 @@
 package com.example.foody.recipe_search.domain
 
+import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import com.example.foody.shared.domain.model.RecipeInfo
+import retrofit2.Response
 
 // 5-th step
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
@@ -11,4 +13,5 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // In this interface we define a search function which returns a list of recipes
 interface RecipesSearchRepository {
     suspend fun search(searchTerm: String) : List<RecipeInfo>
+    suspend fun singleRandomMeal() : List<RecipeInfo>
 }
