@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,23 +18,33 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,13 +64,15 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
+
 @Composable
 fun SearchScreen(
     goToDetailsScreen: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-
+    val fabState = remember { mutableStateOf(false) }
+    
     val performSearch: () -> Unit = remember { { viewModel.search() } }
     val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
     val navigateWith: (String) -> Unit =
@@ -67,6 +80,7 @@ fun SearchScreen(
 
     SearchScreenContent(
         state = state,
+        fabState = fabState,
         performSearch = performSearch,
         navigateWith = navigateWith,
         onValueChanged = onValueChanged
@@ -93,10 +107,12 @@ private fun EmptySearchResult() {
 private fun SearchSuccess(
     mealList: List<RecipeInfo>,
     navigateWith: (recipeId: String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
         contentPadding = PaddingValues(8.dp),
         columns = GridCells.Adaptive(240.dp),
+        modifier = modifier,
         content = {
 
             items(
@@ -110,7 +126,25 @@ private fun SearchSuccess(
                 }
             }
         }
+        
     )
+}
+
+@Composable
+private fun FloatingSearchButton(
+    fabState: MutableState<Boolean>,
+) {
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            FloatingActionButton(onClick = { fabState.value = !fabState.value },) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp)
+                )
+        }
+    }
 }
 
 @Composable
@@ -119,13 +153,20 @@ private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
 @Composable
 private fun SearchScreenContent(
     state: SearchScreenState,
+    fabState: MutableState<Boolean>,
     performSearch: () -> Unit,
     navigateWith: (recipeId: String) -> Unit,
     onValueChanged: (searchTerm: String) -> Unit
 ) {
-
+    val modifier = if(fabState.value) {
+        Modifier.background(Color.LightGray).alpha(0.3f)
+    } else Modifier
+    
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        SearchTextFieldAndButton(state, performSearch, onValueChanged)
+//        SearchTextFieldAndButton(state, performSearch, onValueChanged)
+    
+    }
+    Box (contentAlignment = Alignment.TopCenter){
         when (state.recipeSearchState) {
             is RecipeSearchState.Idle -> Unit
             is RecipeSearchState.Empty -> EmptySearchResult()
@@ -133,15 +174,24 @@ private fun SearchScreenContent(
                 modifier = Modifier.requiredSize(72.dp),
                 strokeWidth = 8.dp
             )
-
-            is RecipeSearchState.Success -> SearchSuccess(
-                state.recipeSearchState.mealList,
-                navigateWith
-            )
-
+            is RecipeSearchState.Success -> {
+                SearchSuccess(
+                    mealList = state.recipeSearchState.mealList,
+                    navigateWith = navigateWith,
+                    modifier = modifier)
+            }
             is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
         }
+        if (fabState.value) {
+            SearchTextFieldAndButton(
+                state = state,
+                fabState = fabState,
+                performSearch = performSearch,
+                onValueChanged = onValueChanged
+            )
+        }
     }
+    FloatingSearchButton(fabState = fabState)
 }
 
 @Composable
@@ -153,11 +203,9 @@ private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
         Column(
             modifier = Modifier
                 .padding(8.dp)
-                .clickable(
-                    enabled = true,
+                .clickable(enabled = true,
                     // klikom na recept idemo na detalje
-                    onClick = { goToDetailsScreen(item.id) }
-                )
+                    onClick = { goToDetailsScreen(item.id) })
         ) {
             Box {
                 if (!item.imageUrl.isNullOrBlank()) {
@@ -174,6 +222,7 @@ private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
 @Composable
 private fun SearchTextFieldAndButton(
     state: SearchScreenState,
+    fabState: MutableState<Boolean>,
     performSearch: () -> Unit,
     onValueChanged: (searchTerm: String) -> Unit
 ) {
@@ -190,7 +239,13 @@ private fun SearchTextFieldAndButton(
                 .clip(shape = RoundedCornerShape(12.dp))
         )
         Spacer(modifier = Modifier.size(16.dp))
-        Button(onClick = { performSearch() }) { Text(text = "Search") }
+        Button(onClick = {
+            performSearch()
+//            if(state.recipeSearchState is RecipeSearchState.Success) {
+                    fabState.value = !fabState.value
+//                }
+            }
+        ) { Text(text = "Search") }
     }
 }
 
@@ -206,10 +261,7 @@ private fun RecipeTitle(title: String) {
             .fillMaxWidth()
             .background(
                 brush = Brush.verticalGradient(
-                    0f to Color.White,
-                    1f to Color.Gray,
-                    startY = 20f,
-                    endY = 80.0f
+                    0f to Color.White, 1f to Color.Gray, startY = 20f, endY = 80.0f
                 ), alpha = 0.8f
             )
             .padding(8.dp),
@@ -237,6 +289,7 @@ private fun RecipeImage(imageUrl: String) {
 private fun Preview() {
     SearchScreenContent(
         state = SearchScreenState.initialValue,
+        fabState = remember { mutableStateOf(true) },
         performSearch = { },
         navigateWith = { },
         onValueChanged = { },
