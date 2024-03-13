@@ -31,12 +31,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -67,21 +64,20 @@ fun SearchScreen(
     goToDetailsScreen: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    // for floating button state
-    val fabExpandedState = rememberSaveable{ mutableStateOf(true) }
     
     val state by viewModel.state.collectAsState()
     val performSearch: () -> Unit = remember { { viewModel.search() } }
     val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
     val navigateWith: (String) -> Unit =
         remember { { viewModel.navigateTo(SearchNavigationEvent.ToDetails(it)) } }
+    val onFabClick: () -> Unit = remember { { viewModel.flipSearchBarExpandedState() } }
 
     SearchScreenContent(
         state = state,
-        fabExpandedState = fabExpandedState,
         performSearch = performSearch,
         navigateWith = navigateWith,
-        onValueChanged = onValueChanged
+        onValueChanged = onValueChanged,
+        onFabClick = onFabClick
     )
 
     // Collecting events from the other side of pipeline
@@ -126,14 +122,14 @@ private fun SearchSuccess(
 
 @Composable
 private fun FloatingSearchButton(
-    fabExpandedState: MutableState<Boolean>,
+    onClick: () -> Unit
 ) {
     Box(
         contentAlignment = Alignment.BottomEnd,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)) {
-            FloatingActionButton(onClick = { fabExpandedState.value = !fabExpandedState.value }) {
+            .padding(16.dp)) {
+            FloatingActionButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
@@ -149,24 +145,23 @@ private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
 @Composable
 private fun SearchScreenContent(
     state: SearchScreenState,
-    fabExpandedState: MutableState<Boolean>,
     performSearch: () -> Unit,
     navigateWith: (recipeId: String) -> Unit,
-    onValueChanged: (searchTerm: String) -> Unit
+    onValueChanged: (searchTerm: String) -> Unit,
+    onFabClick: () -> Unit
 ) {
     
     // for dimming the background ...
-    val modifier = if(fabExpandedState.value) {
+    val modifier = if (state.searchBarState.expandedState) {
         Modifier
             .background(Color.LightGray)
             .alpha(0.3f)
     } else Modifier
     
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (fabExpandedState.value) {
+        if (state.searchBarState.expandedState) {
             SearchTextFieldAndButton(
                 state = state,
-                fabExpandedState = fabExpandedState,
                 performSearch = performSearch,
                 onValueChanged = onValueChanged
             )
@@ -188,7 +183,7 @@ private fun SearchScreenContent(
             is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
         }
     }
-    FloatingSearchButton(fabExpandedState = fabExpandedState)
+    FloatingSearchButton(onFabClick)
 }
 
 @Composable
@@ -219,16 +214,15 @@ private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
 @Composable
 private fun SearchTextFieldAndButton(
     state: SearchScreenState,
-    fabExpandedState: MutableState<Boolean>,
     performSearch: () -> Unit,
-    onValueChanged: (searchTerm: String) -> Unit
+    onValueChanged: (searchTerm: String) -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
-            value = state.searchTerm,
+            value = state.searchBarState.searchTerm,
             onValueChange = { onValueChanged.invoke(it) }, // updates the changes on searchTerm
             modifier = Modifier
                 .height(48.dp)
@@ -236,31 +230,7 @@ private fun SearchTextFieldAndButton(
                 .clip(shape = RoundedCornerShape(12.dp))
         )
         Spacer(modifier = Modifier.size(16.dp))
-        Button(onClick = {
-            
-            // ????? why doesn't it recompose?
-            fabExpandedState.value = true
-            performSearch()
-            
-            when (state.recipeSearchState) {
-                is RecipeSearchState.Idle -> {
-                    fabExpandedState.value = false
-                }
-                is RecipeSearchState.Error -> {
-                    fabExpandedState.value = true
-                }
-                is RecipeSearchState.Empty -> {
-                    fabExpandedState.value = true
-                }
-                is RecipeSearchState.Loading -> {
-                    fabExpandedState.value = true
-                }
-                is RecipeSearchState.Success -> {
-                    fabExpandedState.value = false
-                }
-            }
-        }
-        ) {
+        Button(onClick = performSearch) {
             Text(text = "Search")
         }
     }
@@ -306,9 +276,9 @@ private fun RecipeImage(imageUrl: String) {
 private fun Preview() {
     SearchScreenContent(
         state = SearchScreenState.initialValue,
-        fabExpandedState = remember { mutableStateOf(true) },
         performSearch = { },
         navigateWith = { },
         onValueChanged = { },
+        onFabClick = { }
     )
 }

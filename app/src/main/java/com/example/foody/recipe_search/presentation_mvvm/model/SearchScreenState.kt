@@ -8,10 +8,27 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
-// What do we do here?
-data class SearchScreenState(var searchTerm: String, val recipeSearchState: RecipeSearchState) {
+data class SearchScreenState(val searchBarState: SearchBarState, val recipeSearchState: RecipeSearchState) {
     companion object {
-        val initialValue = SearchScreenState("", RecipeSearchState.Idle)
+        val initialValue = SearchScreenState(SearchBarState.initial, RecipeSearchState.Idle)
+    }
+    
+    fun clone(
+        searchTerm: String = searchBarState.searchTerm,
+        searchBarExpandedState: Boolean = searchBarState.expandedState,
+        recipeSearchState: RecipeSearchState = this.recipeSearchState
+    ) = copy(
+        searchBarState = searchBarState.copy(
+            searchTerm = searchTerm,
+            expandedState = searchBarExpandedState
+        ),
+        recipeSearchState = recipeSearchState
+    )
+}
+
+data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
+    companion object {
+        val initial = SearchBarState("", true)
     }
 }
 
