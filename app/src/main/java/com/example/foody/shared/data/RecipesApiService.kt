@@ -8,7 +8,6 @@ import com.example.foody.shared.domain.model.RecipeResult
 import com.example.foody.recipe_details.domain.RecipeDetailsSearchRepository
 import com.example.foody.recipe_search.data.model.RecipesSearchResponse
 import dagger.hilt.android.scopes.ViewModelScoped
-import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.IOException
 import javax.inject.Inject
@@ -36,7 +35,7 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     // We can then access and override functions from that interface, and get a response back
     private val service = retrofit.create(RecipesApi::class.java)
 
-    // Here we override a function from FoodRecipesSearchRepository interface
+    // Here we override a function from RecipesSearchRepository interface
     override suspend fun search(searchTerm: String) : List<RecipeInfo> {
         val response = service.search(searchTerm = searchTerm)
         if (response.isSuccessful) {
@@ -49,10 +48,10 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     }
     
     // trying to override a fun for a single random recipe
-    override suspend fun singleRandomMeal(): List<RecipeInfo> {
-        val response = service.singleRandomMeal()
+    override suspend fun singleRandomRecipe(): RecipeInfo {
+        val response = service.singleRandomRecipe()
         if (response.isSuccessful) {
-            return response.body()?.mapToInfoList()
+            return response.body()?.mapToInfoList()?.get(0)
                 ?: throw NullPointerException("Search response body is null.")
         } else {
             handleError(response.code(), response.message())

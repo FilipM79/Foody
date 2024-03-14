@@ -75,17 +75,18 @@ class SearchViewModel @Inject constructor(
             _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
         
             val randomRecipeSearchState: RecipeSearchState = try {
-                val mealList = withContext(Dispatchers.IO) {
-                    repository.singleRandomMeal()
+                val startRecipe = withContext(Dispatchers.IO) {
+                    repository.singleRandomRecipe()
                 }
-                if (mealList.isEmpty()) RecipeSearchState.Empty
-                else RecipeSearchState.Success(mealList = mealList)
+                RecipeSearchState.Idle(randomRecipe = startRecipe)
             } catch (e: Exception) {
                 Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
                 RecipeSearchState.Error("Unknown error from search.")
             }
-        
-            _state.emit(_state.value.copy(recipeSearchState = randomRecipeSearchState))
+    
+            _state.emit(
+                _state.value.clone(recipeSearchState = randomRecipeSearchState, startRecipe = repository.singleRandomRecipe())
+            )
         }
     }
 
@@ -99,11 +100,11 @@ class SearchViewModel @Inject constructor(
     
     private fun shouldBarBeExpandedState(recipeSearchState: RecipeSearchState) : Boolean =
          when (recipeSearchState) {
-            is RecipeSearchState.Idle -> true
-            is RecipeSearchState.Error -> true
-            is RecipeSearchState.Empty -> true
-            is RecipeSearchState.Loading -> true
-            is RecipeSearchState.Success -> !state.value.searchBarState.expandedState
+             is RecipeSearchState.Idle -> false
+             is RecipeSearchState.Error -> true
+             is RecipeSearchState.Empty -> true
+             is RecipeSearchState.Loading -> true
+             is RecipeSearchState.Success -> !state.value.searchBarState.expandedState
         }
     
     fun flipSearchBarExpandedState() {

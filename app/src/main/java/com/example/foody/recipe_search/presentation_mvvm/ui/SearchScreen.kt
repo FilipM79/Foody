@@ -67,6 +67,7 @@ fun SearchScreen(
     
     val state by viewModel.state.collectAsState()
     val performSearch: () -> Unit = remember { { viewModel.search() } }
+    val generateRandomRecipe: () -> Unit = remember { { viewModel.randomRecipe()} }
     val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
     val navigateWith: (String) -> Unit =
         remember { { viewModel.navigateTo(SearchNavigationEvent.ToDetails(it)) } }
@@ -75,6 +76,7 @@ fun SearchScreen(
     SearchScreenContent(
         state = state,
         performSearch = performSearch,
+        generateRandomRecipe = generateRandomRecipe,
         navigateWith = navigateWith,
         onValueChanged = onValueChanged,
         onFabClick = onFabClick
@@ -121,6 +123,21 @@ private fun SearchSuccess(
 }
 
 @Composable
+fun ShowOneRandomRecipe(
+    navigateWith: (recipeId: String) -> Unit,
+    generateRandomRecipe: () -> Unit,
+    randomRecipe: RecipeInfo,
+    state: SearchScreenState,
+    modifier: Modifier = Modifier,
+) {
+    Button(onClick = generateRandomRecipe) {
+        Text(text = "Generate")
+    }
+    val randomRecipe2 = state.startRecipe
+    RecipeItem(item = randomRecipe2, goToDetailsScreen = navigateWith)
+}
+
+@Composable
 private fun FloatingSearchButton(
     onClick: () -> Unit
 ) {
@@ -146,6 +163,7 @@ private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
 private fun SearchScreenContent(
     state: SearchScreenState,
     performSearch: () -> Unit,
+    generateRandomRecipe: () -> Unit,
     navigateWith: (recipeId: String) -> Unit,
     onValueChanged: (searchTerm: String) -> Unit,
     onFabClick: () -> Unit
@@ -167,7 +185,12 @@ private fun SearchScreenContent(
             )
         }
         when (state.recipeSearchState) {
-            is RecipeSearchState.Idle -> Unit
+            is RecipeSearchState.Idle -> ShowOneRandomRecipe(
+                navigateWith = navigateWith,
+                generateRandomRecipe = generateRandomRecipe,
+                randomRecipe = state.startRecipe,
+                state = state
+            )
             is RecipeSearchState.Empty -> EmptySearchResult()
             is RecipeSearchState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp), strokeWidth = 8.dp
@@ -185,6 +208,8 @@ private fun SearchScreenContent(
     }
     FloatingSearchButton(onFabClick)
 }
+
+
 
 @Composable
 private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
@@ -277,6 +302,7 @@ private fun Preview() {
     SearchScreenContent(
         state = SearchScreenState.initialValue,
         performSearch = { },
+        generateRandomRecipe = { },
         navigateWith = { },
         onValueChanged = { },
         onFabClick = { }
