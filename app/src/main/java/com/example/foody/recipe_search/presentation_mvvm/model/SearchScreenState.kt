@@ -1,6 +1,5 @@
 package com.example.foody.recipe_search.presentation_mvvm.model
 
-import com.example.foody.shared.domain.model.Ingredient
 import com.example.foody.shared.domain.model.RecipeInfo
 
 // 10-th step
@@ -12,44 +11,43 @@ import com.example.foody.shared.domain.model.RecipeInfo
 data class SearchScreenState(
     val searchBarState: SearchBarState,
     val recipeSearchState: RecipeSearchState,
-    val startRecipe: RecipeInfo
+    val randomRecipe: RecipeInfo
 ) {
     companion object {
         val initialValue = SearchScreenState(
             searchBarState = SearchBarState.initial,
-            startRecipe = StartRecipe.initial.random,
-            recipeSearchState = RecipeSearchState.Idle(StartRecipe.initial.random),
+            randomRecipe = StartRecipe.initial.randomRecipe,
+            recipeSearchState = RecipeSearchState.Idle(StartRecipe.initial.randomRecipe),
         )
-        
     }
     
     fun clone(
         searchTerm: String = searchBarState.searchTerm,
         searchBarExpandedState: Boolean = searchBarState.expandedState,
         recipeSearchState: RecipeSearchState = this.recipeSearchState,
-        startRecipe: RecipeInfo = this.startRecipe
+        randomRecipe: RecipeInfo = this.randomRecipe
     ) = copy(
         searchBarState = searchBarState.copy(
             searchTerm = searchTerm,
             expandedState = searchBarExpandedState,
         ),
         recipeSearchState = recipeSearchState,
-        startRecipe = startRecipe
+        randomRecipe = randomRecipe
     )
 }
 
-data class StartRecipe(val random: RecipeInfo) {
+data class StartRecipe(val randomRecipe: RecipeInfo) {
     companion object {
         val initial = StartRecipe(
-            random = RecipeInfo(
+            randomRecipe = RecipeInfo(
                 title = "Random recipe",
-                cuisine = "Italian",
-                category = "Breakfast",
-                id = "123",
+                cuisine = "",
+                category = "",
+                id = "",
                 imageUrl = "",
-                tags = listOf("1", "2"),
-                ingredients = listOf(Ingredient(title = "Ing 1", measure = "1 tbs")),
-                recipe = "Enjoy",
+                tags = emptyList(),
+                ingredients = emptyList(),
+                recipe = "",
                 videoUrl = ""
             )
         )

@@ -27,6 +27,7 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val repository: RecipesSearchRepository,
 ): ViewModel() {
+    
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
     
@@ -69,23 +70,26 @@ class SearchViewModel @Inject constructor(
     }
     
     // added for a random recipe
-    fun randomRecipe() {
+    fun showRandomRecipe() {
         viewModelScope.launch {
         
             _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
         
             val randomRecipeSearchState: RecipeSearchState = try {
-                val startRecipe = withContext(Dispatchers.IO) {
-                    repository.singleRandomRecipe()
+                val randomRecipe = withContext(Dispatchers.IO) {
+                    repository.randomRecipe()
                 }
-                RecipeSearchState.Idle(randomRecipe = startRecipe)
+                RecipeSearchState.Idle(randomRecipe = randomRecipe)
             } catch (e: Exception) {
                 Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
                 RecipeSearchState.Error("Unknown error from search.")
             }
     
             _state.emit(
-                _state.value.clone(recipeSearchState = randomRecipeSearchState, startRecipe = repository.singleRandomRecipe())
+                _state.value.clone(
+                    recipeSearchState = randomRecipeSearchState,
+                    randomRecipe = repository.randomRecipe()
+                )
             )
         }
     }

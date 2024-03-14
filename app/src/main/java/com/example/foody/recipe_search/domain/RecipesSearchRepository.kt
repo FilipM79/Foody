@@ -11,5 +11,5 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // In this interface we define a search function which returns a list of recipes
 interface RecipesSearchRepository {
     suspend fun search(searchTerm: String) : List<RecipeInfo>
-    suspend fun singleRandomRecipe() : RecipeInfo
+    suspend fun randomRecipe() : RecipeInfo
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -64,10 +65,9 @@ fun SearchScreen(
     goToDetailsScreen: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    
     val state by viewModel.state.collectAsState()
     val performSearch: () -> Unit = remember { { viewModel.search() } }
-    val generateRandomRecipe: () -> Unit = remember { { viewModel.randomRecipe()} }
+    val generateRandomRecipe: () -> Unit = remember { { viewModel.showRandomRecipe()} }
     val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
     val navigateWith: (String) -> Unit =
         remember { { viewModel.navigateTo(SearchNavigationEvent.ToDetails(it)) } }
@@ -81,7 +81,6 @@ fun SearchScreen(
         onValueChanged = onValueChanged,
         onFabClick = onFabClick
     )
-
     // Collecting events from the other side of pipeline
     LaunchedEffect(key1 = Unit ) {
         viewModel.navigation.collect { navigationEvent ->
@@ -95,71 +94,6 @@ fun SearchScreen(
 }
 
 @Composable
-private fun EmptySearchResult() {
-    Text(text = "There are no results for this search term. Please try something else.",
-        modifier = Modifier.padding(16.dp))
-}
-
-@Composable
-private fun SearchSuccess(
-    mealList: List<RecipeInfo>,
-    navigateWith: (recipeId: String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    LazyVerticalGrid(contentPadding = PaddingValues(8.dp),
-        columns = GridCells.Adaptive(240.dp),
-        modifier = modifier,
-        content = {
-        
-            items(count = mealList.size, key = { index -> mealList[index].id } // ???
-            ) {
-                RecipeItem(item = mealList[it]) { recipeId ->
-                    // sending one event via viewModel
-                    navigateWith(recipeId)
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun ShowOneRandomRecipe(
-    navigateWith: (recipeId: String) -> Unit,
-    generateRandomRecipe: () -> Unit,
-    randomRecipe: RecipeInfo,
-    state: SearchScreenState,
-    modifier: Modifier = Modifier,
-) {
-    Button(onClick = generateRandomRecipe) {
-        Text(text = "Generate")
-    }
-    val randomRecipe2 = state.startRecipe
-    RecipeItem(item = randomRecipe2, goToDetailsScreen = navigateWith)
-}
-
-@Composable
-private fun FloatingSearchButton(
-    onClick: () -> Unit
-) {
-    Box(
-        contentAlignment = Alignment.BottomEnd,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-            FloatingActionButton(onClick = onClick) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp)
-                )
-        }
-    }
-}
-
-@Composable
-private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
-
-@Composable
 private fun SearchScreenContent(
     state: SearchScreenState,
     performSearch: () -> Unit,
@@ -168,7 +102,6 @@ private fun SearchScreenContent(
     onValueChanged: (searchTerm: String) -> Unit,
     onFabClick: () -> Unit
 ) {
-    
     // for dimming the background ...
     val modifier = if (state.searchBarState.expandedState) {
         Modifier
@@ -181,16 +114,16 @@ private fun SearchScreenContent(
             SearchTextFieldAndButton(
                 state = state,
                 performSearch = performSearch,
-                onValueChanged = onValueChanged
+                onValueChanged = onValueChanged,
+                generateRandomRecipe = generateRandomRecipe
             )
         }
         when (state.recipeSearchState) {
-            is RecipeSearchState.Idle -> ShowOneRandomRecipe(
-                navigateWith = navigateWith,
-                generateRandomRecipe = generateRandomRecipe,
-                randomRecipe = state.startRecipe,
-                state = state
-            )
+            is RecipeSearchState.Idle ->
+                ShowOneRandomRecipe(
+                    navigateWith = navigateWith,
+                    randomRecipe = state.randomRecipe,
+                )
             is RecipeSearchState.Empty -> EmptySearchResult()
             is RecipeSearchState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp), strokeWidth = 8.dp
@@ -209,13 +142,108 @@ private fun SearchScreenContent(
     FloatingSearchButton(onFabClick)
 }
 
+@Composable
+fun ShowOneRandomRecipe(
+    navigateWith: (recipeId: String) -> Unit,
+    randomRecipe: RecipeInfo,
+) {
+    if (randomRecipe.id != "") {
+        RecipeItem(item = randomRecipe, goToDetailsScreen = navigateWith)
+    }
+}
 
+@Composable
+private fun FloatingSearchButton(
+    onClick: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        FloatingActionButton(onClick = onClick) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchTextFieldAndButton(
+    state: SearchScreenState,
+    performSearch: () -> Unit,
+    onValueChanged: (searchTerm: String) -> Unit,
+    generateRandomRecipe: () -> Unit
+    ) {
+    Column {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = state.searchBarState.searchTerm,
+                onValueChange = { onValueChanged.invoke(it) }, // updates the changes on searchTerm
+                modifier = Modifier
+                    .height(48.dp)
+                    .weight(1f)
+                    .clip(shape = RoundedCornerShape(12.dp))
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Button(onClick = performSearch) {
+                Text(text = "Search")
+            }
+        }
+        Button(onClick = generateRandomRecipe,
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
+        ) {
+            Text(text = "Generate random recipe")
+        }
+    }
+}
+
+@Composable
+private fun SearchSuccess(
+    mealList: List<RecipeInfo>,
+    navigateWith: (recipeId: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyVerticalGrid(
+        contentPadding = PaddingValues(8.dp),
+        columns = GridCells.Adaptive(240.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = modifier,
+        content = {
+        
+            items(count = mealList.size, key = { index -> mealList[index].id } // ???
+            ) {
+                RecipeItem(item = mealList[it]) { recipeId ->
+                    // sending one event via viewModel
+                    navigateWith(recipeId)
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun ErrorMessage(errorMessage: String) { Text(text = errorMessage) }
+
+@Composable
+private fun EmptySearchResult() {
+    Text(text = "There are no results for this search term. Please try something else.",
+        modifier = Modifier.padding(16.dp))
+}
 
 @Composable
 private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
     Card(
         elevation = CardDefaults.elevatedCardElevation(8.dp),
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Column(
             modifier = Modifier
@@ -232,31 +260,6 @@ private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
                     RecipeTitle(title = item.title)
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SearchTextFieldAndButton(
-    state: SearchScreenState,
-    performSearch: () -> Unit,
-    onValueChanged: (searchTerm: String) -> Unit,
-) {
-    Row(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TextField(
-            value = state.searchBarState.searchTerm,
-            onValueChange = { onValueChanged.invoke(it) }, // updates the changes on searchTerm
-            modifier = Modifier
-                .height(48.dp)
-                .weight(1f)
-                .clip(shape = RoundedCornerShape(12.dp))
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Button(onClick = performSearch) {
-            Text(text = "Search")
         }
     }
 }

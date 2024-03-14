@@ -32,7 +32,7 @@ interface RecipesApi {
     ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/random.php")
-    suspend fun singleRandomRecipe() : Response<RecipesSearchResponse>
+    suspend fun randomRecipe() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/categories.php")
     suspend fun listDetailedMealCategories() : Response<RecipesSearchResponse>
