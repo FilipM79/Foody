@@ -213,7 +213,7 @@ private fun SearchSuccess(
 ) {
     LazyVerticalGrid(
         contentPadding = PaddingValues(8.dp),
-        columns = GridCells.Adaptive(240.dp),
+        columns = GridCells.Adaptive(180.dp),
         verticalArrangement = Arrangement.spacedBy(3.dp),
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = modifier,
@@ -243,7 +243,7 @@ private fun EmptySearchResult() {
 private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
     Card(
         elevation = CardDefaults.elevatedCardElevation(8.dp),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -269,7 +269,7 @@ private fun RecipeTitle(title: String) {
     Text(
         text = title,
         textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
             .clip(shape = RoundedCornerShape(12.dp))
@@ -277,7 +277,7 @@ private fun RecipeTitle(title: String) {
             .background(
                 brush = Brush.verticalGradient(
                     0f to Color.White, 1f to Color.Gray, startY = 20f, endY = 80.0f
-                ), alpha = 0.8f
+                ), alpha = 0.6f
             )
             .padding(8.dp),
         color = Color.Black
