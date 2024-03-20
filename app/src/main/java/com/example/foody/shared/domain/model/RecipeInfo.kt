@@ -15,4 +15,18 @@ data class RecipeInfo(
     val imageUrl: String?,
     val videoUrl: String?,
     val tags: List<String>,
-)
+) {
+    companion object {
+        val initial = RecipeInfo(
+            id = "",
+            title = "Initial recipe",
+            cuisine = "",
+            category = "",
+            ingredients = emptyList(),
+            recipe = "",
+            imageUrl = "",
+            videoUrl = "",
+            tags = emptyList()
+        )
+    }
+}

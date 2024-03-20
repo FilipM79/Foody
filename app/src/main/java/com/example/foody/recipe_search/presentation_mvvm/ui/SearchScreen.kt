@@ -119,24 +119,25 @@ private fun SearchScreenContent(
             )
         }
         when (state.recipeSearchState) {
-            is RecipeSearchState.Idle ->
-                ShowOneRandomRecipe(
-                    navigateWith = navigateWith,
-                    randomRecipe = state.randomRecipe,
-                )
+            is RecipeSearchState.Idle -> Unit
+            is RecipeSearchState.Random -> ShowOneRandomRecipe(
+                navigateWith = navigateWith,
+                randomRecipe = state.randomRecipe
+            )
             is RecipeSearchState.Empty -> EmptySearchResult()
             is RecipeSearchState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp), strokeWidth = 8.dp
             )
             is RecipeSearchState.Success -> {
                 SearchSuccess(
-                    mealList = state.recipeSearchState.mealList,
+                    recipeList = state.recipeSearchState.recipeList,
                     navigateWith = navigateWith,
                     // for dimming the background ...
                     modifier = modifier
                 )
             }
             is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
+            
         }
     }
     FloatingSearchButton(onFabClick)
@@ -207,7 +208,7 @@ private fun SearchTextFieldAndButton(
 
 @Composable
 private fun SearchSuccess(
-    mealList: List<RecipeInfo>,
+    recipeList: List<RecipeInfo>,
     navigateWith: (recipeId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -219,9 +220,9 @@ private fun SearchSuccess(
         modifier = modifier,
         content = {
         
-            items(count = mealList.size, key = { index -> mealList[index].id } // ???
+            items(count = recipeList.size, key = { index -> recipeList[index].id } // ???
             ) {
-                RecipeItem(item = mealList[it]) { recipeId ->
+                RecipeItem(item = recipeList[it]) { recipeId ->
                     // sending one event via viewModel
                     navigateWith(recipeId)
                 }

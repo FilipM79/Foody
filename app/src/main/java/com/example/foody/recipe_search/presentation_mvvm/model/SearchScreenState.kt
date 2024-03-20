@@ -16,8 +16,8 @@ data class SearchScreenState(
     companion object {
         val initialValue = SearchScreenState(
             searchBarState = SearchBarState.initial,
-            randomRecipe = StartRecipe.initial.randomRecipe,
-            recipeSearchState = RecipeSearchState.Idle(StartRecipe.initial.randomRecipe),
+            recipeSearchState = RecipeSearchState.Idle,
+            randomRecipe = RecipeSearchState.Random(RecipeInfo.initial).randomRecipe
         )
     }
     
@@ -36,23 +36,11 @@ data class SearchScreenState(
     )
 }
 
-data class StartRecipe(val randomRecipe: RecipeInfo) {
-    companion object {
-        val initial = StartRecipe(
-            randomRecipe = RecipeInfo(
-                title = "Random recipe",
-                cuisine = "",
-                category = "",
-                id = "",
-                imageUrl = "",
-                tags = emptyList(),
-                ingredients = emptyList(),
-                recipe = "",
-                videoUrl = ""
-            )
-        )
-    }
-}
+//data class StartRecipe(val randomRecipe: List<RecipeInfo>) {
+//    companion object {
+//        val initial = StartRecipe(emptyList())
+//    }
+//}
 
 data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
     companion object {
@@ -61,9 +49,10 @@ data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
 }
 
 sealed class RecipeSearchState {
-    data class Idle(val randomRecipe: RecipeInfo) : RecipeSearchState()
+    data object Idle : RecipeSearchState()
+    data class Random(val randomRecipe: RecipeInfo) : RecipeSearchState()
     data object Empty : RecipeSearchState()
     data object Loading: RecipeSearchState()
-    data class Success(val mealList: List<RecipeInfo>): RecipeSearchState()
+    data class Success(val recipeList: List<RecipeInfo>): RecipeSearchState()
     data class Error(val message: String) : RecipeSearchState()
 }
