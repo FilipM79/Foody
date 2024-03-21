@@ -48,10 +48,10 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     }
     
     // trying to override a fun for a single random recipe
-    override suspend fun randomRecipe(): RecipeInfo {
+    override suspend fun randomRecipe(): List<RecipeInfo> {
         val response = service.randomRecipe()
         if (response.isSuccessful) {
-            return response.body()?.mapToInfoList()?.get(0)
+            return response.body()?.mapToInfoList()
                 ?: throw NullPointerException("Search response body is null.")
         } else {
             handleError(response.code(), response.message())

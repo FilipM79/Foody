@@ -120,12 +120,6 @@ private fun SearchScreenContent(
         }
         when (state.recipeSearchState) {
             is RecipeSearchState.Idle -> Unit
-            is RecipeSearchState.Random -> {
-                ShowOneRandomRecipe(
-                    navigateWith = navigateWith,
-                    randomRecipeList = state.recipeSearchState.recipeList
-                )
-            }
             is RecipeSearchState.Empty -> EmptySearchResult()
             is RecipeSearchState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp), strokeWidth = 8.dp
@@ -142,16 +136,6 @@ private fun SearchScreenContent(
         }
     }
     FloatingSearchButton(onFabClick)
-}
-
-@Composable
-fun ShowOneRandomRecipe(
-    navigateWith: (recipeId: String) -> Unit,
-    randomRecipeList: List<RecipeInfo>,
-) {
-    if (randomRecipeList.isNotEmpty()) {
-        RecipeItem(item = randomRecipeList[0], goToDetailsScreen = navigateWith)
-    }
 }
 
 @Composable
@@ -200,10 +184,22 @@ private fun SearchTextFieldAndButton(
             }
         }
         Button(onClick = generateRandomRecipe,
-            modifier = Modifier.fillMaxWidth().padding(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         ) {
             Text(text = "Generate random recipe")
         }
+    }
+}
+
+@Composable
+fun ShowOneRandomRecipe(
+    navigateWith: (recipeId: String) -> Unit,
+    randomRecipeList: List<RecipeInfo>,
+) {
+    if (randomRecipeList.isNotEmpty()) {
+        RecipeItem(item = randomRecipeList[0], goToDetailsScreen = navigateWith)
     }
 }
 
@@ -215,22 +211,25 @@ private fun SearchSuccess(
 ) {
     val cellSize = if (recipeList.size > 2) 150.dp else 250.dp
     
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(cellSize),
-        contentPadding = PaddingValues(4.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-        modifier = modifier,
-        content = {
-            items(count = recipeList.size, key = { index -> recipeList[index].id } // ???
-            ) {
-                RecipeItem(item = recipeList[it]) { recipeId ->
-                    // sending one event via viewModel
-                    navigateWith(recipeId)
+    if(recipeList.size == 1) {
+        ShowOneRandomRecipe(navigateWith = navigateWith, randomRecipeList = recipeList)
+    } else {
+        LazyVerticalGrid(columns = GridCells.Adaptive(cellSize),
+            contentPadding = PaddingValues(4.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            modifier = modifier,
+            content = {
+                items(count = recipeList.size, key = { index -> recipeList[index].id } // ???
+                ) {
+                    RecipeItem(item = recipeList[it]) { recipeId ->
+                        // sending one event via viewModel
+                        navigateWith(recipeId)
+                    }
                 }
             }
-        }
-    )
+        )
+    }
 }
 
 @Composable

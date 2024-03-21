@@ -34,7 +34,6 @@ data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
 
 sealed class RecipeSearchState {
     data object Idle : RecipeSearchState()
-    data class Random(val recipeList: List<RecipeInfo>) : RecipeSearchState()
     data object Empty : RecipeSearchState()
     data object Loading: RecipeSearchState()
     data class Success(val recipeList: List<RecipeInfo>): RecipeSearchState()
