@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.exp
 
 // 11-th step
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
@@ -28,9 +29,6 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val repository: RecipesSearchRepository,
 ): ViewModel() {
-    init {
-        showRandomRecipe()
-    }
     
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
@@ -38,50 +36,52 @@ class SearchViewModel @Inject constructor(
     private val _navigation = Channel<SearchNavigationEvent>()
     val navigation: Flow<SearchNavigationEvent> = _navigation.receiveAsFlow()
     
-    private lateinit var newRecipeSearchState: RecipeSearchState
+    init {
+        showRandomRecipe()
+    }
 
     fun navigateTo(event: SearchNavigationEvent) { viewModelScope.launch { _navigation.send(event) }}
 
     fun search() {
-        viewModelScope.launch {
-            fetchRecipeListAndSearchBarState(
-                repositoryFunction = repository.search(state.value.searchBarState.searchTerm),
-                shouldBarBeExpandedState(newRecipeSearchState)
-            )
-        }
+        fetchRecipeListAndSearchBarState(
+            // important to do a lambda " { } " call for repositoryFunction
+            repositoryFunction = { repository.search(state.value.searchBarState.searchTerm) },
+//            expandedState = ::shouldBarBeExpandedState // this way "::" we are passing a function as lambda
+            expandedState = { shouldBarBeExpandedState(it) }
+        )
     }
     
     fun showRandomRecipe() {
-        viewModelScope.launch {
-            fetchRecipeListAndSearchBarState(repository.randomRecipe(), true)
-        }
+        fetchRecipeListAndSearchBarState( { repository.randomRecipe() }, { true })
     }
     
-    private suspend fun fetchRecipeListAndSearchBarState(
-        repositoryFunction: List<RecipeInfo>,
-        expandedState: Boolean,
+    private fun fetchRecipeListAndSearchBarState(
+        repositoryFunction: suspend () -> List<RecipeInfo>, // must be suspend in order to call a suspend fun
+        expandedState: (RecipeSearchState) -> Boolean
     ) {
-        _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
+        viewModelScope.launch {
+            _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
     
-        newRecipeSearchState = try {
-            val recipeList = withContext(Dispatchers.IO) {
-                repositoryFunction
-            }
+            val newRecipeSearchState = try {
+                val recipeList = withContext(Dispatchers.IO) {
+                    repositoryFunction() // calling lambda here, instead when passing it
+                }
         
-            if (recipeList.isEmpty()) RecipeSearchState.Empty
-            else RecipeSearchState.Success(recipeList = recipeList)
-        } catch (e: Exception) {
-            Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
-            RecipeSearchState.Error("Unknown error from search.")
-        }
+                if (recipeList.isEmpty()) RecipeSearchState.Empty
+                else RecipeSearchState.Success(recipeList = recipeList)
+            } catch (e: Exception) {
+                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
+                RecipeSearchState.Error("Unknown error from search.")
+            }
     
-        _state.emit(
-            _state.value.clone(
-                recipeSearchState = newRecipeSearchState,
-                searchBarExpandedState = expandedState,
-                searchTerm = ""
+            _state.emit(
+                _state.value.clone(
+                    recipeSearchState = newRecipeSearchState,
+                    searchBarExpandedState = expandedState(newRecipeSearchState),
+                    searchTerm = ""
+                )
             )
-        )
+        }
     }
     
     fun updateSearchTerm(searchTerm: String) {

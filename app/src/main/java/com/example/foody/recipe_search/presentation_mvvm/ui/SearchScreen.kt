@@ -209,12 +209,12 @@ private fun SearchSuccess(
     navigateWith: (recipeId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cellSize = if (recipeList.size > 2) 150.dp else 250.dp
+//    val cellSize = if (recipeList.size > 2) 150.dp else 250.dp
     
     if(recipeList.size == 1) {
         ShowOneRandomRecipe(navigateWith = navigateWith, randomRecipeList = recipeList)
     } else {
-        LazyVerticalGrid(columns = GridCells.Adaptive(cellSize),
+        LazyVerticalGrid(columns = GridCells.Adaptive(150.dp),
             contentPadding = PaddingValues(4.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),
             horizontalArrangement = Arrangement.spacedBy(3.dp),
