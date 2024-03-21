@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.foody.recipe_search.domain.RecipesSearchRepository
 import com.example.foody.recipe_search.presentation_mvvm.model.RecipeSearchState
 import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
-import com.example.foody.shared.domain.model.RecipeInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -28,15 +27,18 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val repository: RecipesSearchRepository,
 ): ViewModel() {
-    
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
     
     private val _navigation = Channel<SearchNavigationEvent>()
     val navigation: Flow<SearchNavigationEvent> = _navigation.receiveAsFlow()
 
+    init {
+        showRandomRecipe()
+    }
+
     fun navigateTo(event: SearchNavigationEvent) { viewModelScope.launch { _navigation.send(event) }}
-    
+
     fun search() {
         viewModelScope.launch {  // prelazak na IO thread
             _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
@@ -64,36 +66,32 @@ class SearchViewModel @Inject constructor(
         }
     }
     
-    // added for a random recipe
     fun showRandomRecipe() {
-        viewModelScope.launch {
+        viewModelScope.launch {  // prelazak na IO thread
             _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
-    
-            val randomRecipe : RecipeInfo = try {
-                withContext(Dispatchers.IO) {
-                    repository.randomRecipe()
+            
+            val newRecipeSearchState: RecipeSearchState = try {
+                val recipeList = withContext(Dispatchers.IO) {
+                    listOf(repository.randomRecipe())
                 }
+                if (recipeList.isEmpty()) RecipeSearchState.Empty
+                else RecipeSearchState.Random(recipeList = recipeList)
             } catch (e: Exception) {
-                Log.e("RecipeSearchViewModel - randomRecipe", e.message.orEmpty(), e)
-                RecipeInfo.initial
+                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
+                RecipeSearchState.Error("Unknown error from search.")
             }
             
-            val randomRecipeSearchState: RecipeSearchState =
-                if (randomRecipe.id == "") RecipeSearchState.Empty
-                else RecipeSearchState.Random(randomRecipe = randomRecipe)
+            val searchBarExpandedState = shouldBarBeExpandedState(newRecipeSearchState)
             
-            val searchBarExpandedState = shouldBarBeExpandedState(randomRecipeSearchState)
-    
             _state.emit(
                 _state.value.clone(
-                    recipeSearchState = randomRecipeSearchState,
+                    recipeSearchState = newRecipeSearchState,
                     searchBarExpandedState = searchBarExpandedState,
-                    randomRecipe = randomRecipe
                 )
             )
         }
     }
-
+    
     fun updateSearchTerm(searchTerm: String) {
         viewModelScope.launch {
             _state.emit(

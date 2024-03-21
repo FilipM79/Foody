@@ -8,39 +8,23 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
-data class SearchScreenState(
-    val searchBarState: SearchBarState,
-    val recipeSearchState: RecipeSearchState,
-    val randomRecipe: RecipeInfo
-) {
+data class SearchScreenState(val searchBarState: SearchBarState, val recipeSearchState: RecipeSearchState) {
     companion object {
-        val initialValue = SearchScreenState(
-            searchBarState = SearchBarState.initial,
-            recipeSearchState = RecipeSearchState.Idle,
-            randomRecipe = RecipeSearchState.Random(RecipeInfo.initial).randomRecipe
-        )
+        val initialValue = SearchScreenState(SearchBarState.initial, RecipeSearchState.Idle)
     }
     
     fun clone(
         searchTerm: String = searchBarState.searchTerm,
         searchBarExpandedState: Boolean = searchBarState.expandedState,
-        recipeSearchState: RecipeSearchState = this.recipeSearchState,
-        randomRecipe: RecipeInfo = this.randomRecipe
+        recipeSearchState: RecipeSearchState = this.recipeSearchState
     ) = copy(
         searchBarState = searchBarState.copy(
             searchTerm = searchTerm,
-            expandedState = searchBarExpandedState,
+            expandedState = searchBarExpandedState
         ),
-        recipeSearchState = recipeSearchState,
-        randomRecipe = randomRecipe
+        recipeSearchState = recipeSearchState
     )
 }
-
-//data class StartRecipe(val randomRecipe: List<RecipeInfo>) {
-//    companion object {
-//        val initial = StartRecipe(emptyList())
-//    }
-//}
 
 data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
     companion object {
@@ -50,7 +34,7 @@ data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
 
 sealed class RecipeSearchState {
     data object Idle : RecipeSearchState()
-    data class Random(val randomRecipe: RecipeInfo) : RecipeSearchState()
+    data class Random(val recipeList: List<RecipeInfo>) : RecipeSearchState()
     data object Empty : RecipeSearchState()
     data object Loading: RecipeSearchState()
     data class Success(val recipeList: List<RecipeInfo>): RecipeSearchState()

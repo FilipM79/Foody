@@ -62,6 +62,5 @@ interface RecipesApi {
     ) : Response<RecipesSearchResponse>
 
     // www.themealdb.com/images/ingredients/Lime.png
-
 }
 

@@ -67,7 +67,7 @@ fun SearchScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val performSearch: () -> Unit = remember { { viewModel.search() } }
-    val generateRandomRecipe: () -> Unit = remember { { viewModel.showRandomRecipe()} }
+    val generateRandomRecipe: () -> Unit = remember { { viewModel.showRandomRecipe() } }
     val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
     val navigateWith: (String) -> Unit =
         remember { { viewModel.navigateTo(SearchNavigationEvent.ToDetails(it)) } }
@@ -120,10 +120,12 @@ private fun SearchScreenContent(
         }
         when (state.recipeSearchState) {
             is RecipeSearchState.Idle -> Unit
-            is RecipeSearchState.Random -> ShowOneRandomRecipe(
-                navigateWith = navigateWith,
-                randomRecipe = state.randomRecipe
-            )
+            is RecipeSearchState.Random -> {
+                ShowOneRandomRecipe(
+                    navigateWith = navigateWith,
+                    randomRecipeList = state.recipeSearchState.recipeList
+                )
+            }
             is RecipeSearchState.Empty -> EmptySearchResult()
             is RecipeSearchState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp), strokeWidth = 8.dp
@@ -137,7 +139,6 @@ private fun SearchScreenContent(
                 )
             }
             is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
-            
         }
     }
     FloatingSearchButton(onFabClick)
@@ -146,10 +147,10 @@ private fun SearchScreenContent(
 @Composable
 fun ShowOneRandomRecipe(
     navigateWith: (recipeId: String) -> Unit,
-    randomRecipe: RecipeInfo,
+    randomRecipeList: List<RecipeInfo>,
 ) {
-    if (randomRecipe.id != "") {
-        RecipeItem(item = randomRecipe, goToDetailsScreen = navigateWith)
+    if (randomRecipeList.isNotEmpty()) {
+        RecipeItem(item = randomRecipeList[0], goToDetailsScreen = navigateWith)
     }
 }
 
@@ -212,14 +213,15 @@ private fun SearchSuccess(
     navigateWith: (recipeId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val cellSize = if (recipeList.size > 2) 150.dp else 250.dp
+    
     LazyVerticalGrid(
-        contentPadding = PaddingValues(8.dp),
-        columns = GridCells.Adaptive(180.dp),
+        columns = GridCells.Adaptive(cellSize),
+        contentPadding = PaddingValues(4.dp),
         verticalArrangement = Arrangement.spacedBy(3.dp),
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = modifier,
         content = {
-        
             items(count = recipeList.size, key = { index -> recipeList[index].id } // ???
             ) {
                 RecipeItem(item = recipeList[it]) { recipeId ->
