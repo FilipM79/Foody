@@ -42,7 +42,6 @@ class SearchViewModel @Inject constructor(
         // (i zato sto zelimo da ostavimo ostale eventualne delove state-a nepromenjene)
 
         viewModelScope.launch {  // prelazak na IO thread
-
             _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
 
             val newRecipeSearchState: RecipeSearchState = try {
@@ -65,27 +64,6 @@ class SearchViewModel @Inject constructor(
                     searchTerm = ""
                 )
             )
-        }
-    }
-    
-    // added for a random recipe
-    fun randomRecipe() {
-        viewModelScope.launch {
-        
-            _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
-        
-            val randomRecipeSearchState: RecipeSearchState = try {
-                val mealList = withContext(Dispatchers.IO) {
-                    repository.singleRandomMeal()
-                }
-                if (mealList.isEmpty()) RecipeSearchState.Empty
-                else RecipeSearchState.Success(mealList = mealList)
-            } catch (e: Exception) {
-                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
-                RecipeSearchState.Error("Unknown error from search.")
-            }
-        
-            _state.emit(_state.value.copy(recipeSearchState = randomRecipeSearchState))
         }
     }
 

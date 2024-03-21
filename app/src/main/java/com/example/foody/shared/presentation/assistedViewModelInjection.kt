@@ -21,7 +21,6 @@ import dagger.hilt.android.lifecycle.withCreationCallback
 @Composable
 inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> assistedHiltViewModel(
     extras: T,
-    // ??? checkNotNull not clear enough to me.
     viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
     },
@@ -53,9 +52,8 @@ inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> ass
     return viewModel(VM::class.java, viewModelStoreOwner, key, factory, creationExtras)
 }
 
-// ??? wtf is this :) ?
-@Suppress("unused") // ???
-@MainThread // ???
+@Suppress("unused")
+@MainThread
 inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> Fragment.assistedViewModels(
     noinline ownerProducer: () -> ViewModelStoreOwner = { this },
     noinline factoryProducer: (() -> ViewModelProvider.Factory)? = null,

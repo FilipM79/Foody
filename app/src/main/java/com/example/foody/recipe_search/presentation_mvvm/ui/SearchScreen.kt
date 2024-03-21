@@ -64,7 +64,6 @@ fun SearchScreen(
     goToDetailsScreen: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    
     val state by viewModel.state.collectAsState()
     val performSearch: () -> Unit = remember { { viewModel.search() } }
     val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
@@ -109,7 +108,7 @@ private fun SearchSuccess(
         modifier = modifier,
         content = {
         
-            items(count = mealList.size, key = { index -> mealList[index].id } // ???
+            items(count = mealList.size, key = { index -> mealList[index].id }
             ) {
                 RecipeItem(item = mealList[it]) { recipeId ->
                     // sending one event via viewModel
@@ -129,12 +128,12 @@ private fun FloatingSearchButton(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)) {
-            FloatingActionButton(onClick = onClick) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp)
-                )
+        FloatingActionButton(onClick = onClick) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
         }
     }
 }
@@ -150,9 +149,8 @@ private fun SearchScreenContent(
     onValueChanged: (searchTerm: String) -> Unit,
     onFabClick: () -> Unit
 ) {
-    
     // for dimming the background ...
-    val modifier = if (state.searchBarState.expandedState) {
+    val dimmingModifier = if (state.searchBarState.expandedState) {
         Modifier
             .background(Color.LightGray)
             .alpha(0.3f)
@@ -177,7 +175,7 @@ private fun SearchScreenContent(
                     mealList = state.recipeSearchState.mealList,
                     navigateWith = navigateWith,
                     // for dimming the background ...
-                    modifier = modifier
+                    modifier = dimmingModifier
                 )
             }
             is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
