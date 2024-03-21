@@ -25,7 +25,6 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     : RecipesSearchRepository, RecipeDetailsSearchRepository {
 
     companion object {
-//        private const val PAGE_SIZE: Int = 10
         private const val TAG = "FoodRecipesSearchRepository"
     }
 
@@ -47,7 +46,6 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
         }
     }
     
-    // trying to override a fun for a single random recipe
     override suspend fun randomRecipe(): List<RecipeInfo> {
         val response = service.randomRecipe()
         if (response.isSuccessful) {

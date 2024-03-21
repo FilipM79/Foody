@@ -15,7 +15,6 @@ import dagger.hilt.android.scopes.ViewModelScoped
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
-// This is the module for search viewModel. What do we do here?
 @Module
 @InstallIn(ViewModelComponent::class)
 object ViewModelModule {

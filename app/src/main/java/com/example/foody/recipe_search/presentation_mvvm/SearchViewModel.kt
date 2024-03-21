@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.exp
 
 // 11-th step
 // (1.NetworkModule, 2.RecipeItemResponse, 3.RecipeSearchResponse 4.FoodRecipesApi,
@@ -44,7 +43,7 @@ class SearchViewModel @Inject constructor(
 
     fun search() {
         fetchRecipeListAndSearchBarState(
-            // important to do a lambda " { } " call for repositoryFunction
+            // important to do a lambda "{ }" call for repositoryFunction
             repositoryFunction = { repository.search(state.value.searchBarState.searchTerm) },
 //            expandedState = ::shouldBarBeExpandedState // this way "::" we are passing a function as lambda
             expandedState = { shouldBarBeExpandedState(it) }
