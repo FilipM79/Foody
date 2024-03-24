@@ -82,7 +82,7 @@ class SearchViewModel @Inject constructor(
             )
         }
     }
-    
+
     fun updateSearchTerm(searchTerm: String) {
         viewModelScope.launch {
             _state.emit(
