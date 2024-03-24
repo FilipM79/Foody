@@ -4,8 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foody.recipe_search.domain.RecipesSearchRepository
-import com.example.foody.recipe_search.presentation_mvvm.model.RecipeSearchState
+import com.example.foody.recipe_search.presentation_mvvm.model.RecipeListState
 import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
+import com.example.foody.shared.domain.model.RecipeInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -27,40 +28,55 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val repository: RecipesSearchRepository,
 ): ViewModel() {
+    
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
     
     private val _navigation = Channel<SearchNavigationEvent>()
     val navigation: Flow<SearchNavigationEvent> = _navigation.receiveAsFlow()
+    
+    init {
+        showRandomRecipe()
+    }
 
     fun navigateTo(event: SearchNavigationEvent) { viewModelScope.launch { _navigation.send(event) }}
 
     fun search() {
-        // Pojedinacni emit predstavlja jedan event tipa SearchScreenState koji flow emituje dalje
-        // To se zatim kolektuje kao state u compose-u i dolazi do rekompozicije
-        // ovako smo uradili radi efikasnijeg koriscenja memorije
-        // (i zato sto zelimo da ostavimo ostale eventualne delove state-a nepromenjene)
-
-        viewModelScope.launch {  // prelazak na IO thread
-            _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
-
-            val newRecipeSearchState: RecipeSearchState = try {
-                val mealList = withContext(Dispatchers.IO) {
-                    repository.search(state.value.searchBarState.searchTerm)
+        fetchRecipeListAndSearchBarState(
+            // important to do a lambda "{ }" call for repositoryFunction
+            repositoryFunction = { repository.search(state.value.searchBarState.searchTerm) },
+//            expandedState = ::shouldBarBeExpandedState // this way "::" we are passing a function as lambda
+            expandedState = { shouldBarBeExpandedState(it) }
+        )
+    }
+    
+    fun showRandomRecipe() {
+        fetchRecipeListAndSearchBarState( { repository.randomRecipe() }, { true })
+    }
+    
+    private fun fetchRecipeListAndSearchBarState(
+        repositoryFunction: suspend () -> List<RecipeInfo>, // must be suspend in order to call a suspend fun
+        expandedState: (RecipeListState) -> Boolean
+    ) {
+        viewModelScope.launch {
+            _state.emit(_state.value.copy(recipeListState = RecipeListState.Loading))
+    
+            val newRecipeListState = try {
+                val recipeList = withContext(Dispatchers.IO) {
+                    repositoryFunction() // calling lambda here, instead when passing it
                 }
-                if (mealList.isEmpty()) RecipeSearchState.Empty
-                else RecipeSearchState.Success(mealList = mealList)
+        
+                if (recipeList.isEmpty()) RecipeListState.Empty
+                else RecipeListState.Success(recipeList = recipeList)
             } catch (e: Exception) {
                 Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
-                RecipeSearchState.Error("Unknown error from search.")
+                RecipeListState.Error("Unknown error from search.")
             }
-
-            val searchBarExpandedState = shouldBarBeExpandedState(newRecipeSearchState)
-            
+    
             _state.emit(
                 _state.value.clone(
-                    recipeSearchState = newRecipeSearchState,
-                    searchBarExpandedState = searchBarExpandedState,
+                    recipeListState = newRecipeListState,
+                    searchBarExpandedState = expandedState(newRecipeListState),
                     searchTerm = ""
                 )
             )
@@ -75,14 +91,14 @@ class SearchViewModel @Inject constructor(
         }
     }
     
-    private fun shouldBarBeExpandedState(recipeSearchState: RecipeSearchState) : Boolean =
-         when (recipeSearchState) {
-            is RecipeSearchState.Idle -> true
-            is RecipeSearchState.Error -> true
-            is RecipeSearchState.Empty -> true
-            is RecipeSearchState.Loading -> true
-            is RecipeSearchState.Success -> !state.value.searchBarState.expandedState
-        }
+    private fun shouldBarBeExpandedState(recipeListState: RecipeListState) : Boolean =
+         when (recipeListState) {
+             is RecipeListState.Idle -> true
+             is RecipeListState.Error -> true
+             is RecipeListState.Empty -> true
+             is RecipeListState.Loading -> true
+             is RecipeListState.Success -> !state.value.searchBarState.expandedState
+         }
     
     fun flipSearchBarExpandedState() {
         viewModelScope.launch {

@@ -34,9 +34,20 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     // We can then access and override functions from that interface, and get a response back
     private val service = retrofit.create(RecipesApi::class.java)
 
-    // Here we override a function from FoodRecipesSearchRepository interface
+    // Here we override a function from RecipesSearchRepository interface
     override suspend fun search(searchTerm: String) : List<RecipeInfo> {
         val response = service.search(searchTerm = searchTerm)
+        if (response.isSuccessful) {
+            return response.body()?.mapToInfoList()
+                ?: throw NullPointerException("Search response body is null.")
+        } else {
+            handleError(response.code(), response.message())
+            throw IOException("${response.code()}, ${response.message()}")
+        }
+    }
+    
+    override suspend fun randomRecipe(): List<RecipeInfo> {
+        val response = service.randomRecipe()
         if (response.isSuccessful) {
             return response.body()?.mapToInfoList()
                 ?: throw NullPointerException("Search response body is null.")

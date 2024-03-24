@@ -32,7 +32,7 @@ interface RecipesApi {
     ) : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/random.php")
-    suspend fun singleRandomMeal() : Response<RecipesSearchResponse>
+    suspend fun randomRecipe() : Response<RecipesSearchResponse>
 
     @GET("/api/json/v1/1/categories.php")
     suspend fun listDetailedMealCategories() : Response<RecipesSearchResponse>
@@ -62,6 +62,5 @@ interface RecipesApi {
     ) : Response<RecipesSearchResponse>
 
     // www.themealdb.com/images/ingredients/Lime.png
-
 }
 

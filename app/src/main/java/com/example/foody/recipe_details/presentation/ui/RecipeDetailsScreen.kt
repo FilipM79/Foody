@@ -190,9 +190,10 @@ private fun Ingredients(ingredients: List<Ingredient>) {
             fontWeight = FontWeight.Bold
         )
         LazyHorizontalGrid(
-            horizontalArrangement = Arrangement.Center,
             contentPadding = PaddingValues(0.dp),
-            rows = GridCells.Fixed(2),
+            rows = GridCells.Adaptive(150.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
             modifier = Modifier
                 .height(430.dp),
             content = {
