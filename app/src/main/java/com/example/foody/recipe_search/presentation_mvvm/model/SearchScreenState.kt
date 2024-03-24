@@ -8,21 +8,21 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
-data class SearchScreenState(val searchBarState: SearchBarState, val recipeSearchState: RecipeSearchState) {
+data class SearchScreenState(val searchBarState: SearchBarState, val recipeListState: RecipeListState) {
     companion object {
-        val initialValue = SearchScreenState(SearchBarState.initial, RecipeSearchState.Idle)
+        val initialValue = SearchScreenState(SearchBarState.initial, RecipeListState.Idle)
     }
     
     fun clone(
         searchTerm: String = searchBarState.searchTerm,
         searchBarExpandedState: Boolean = searchBarState.expandedState,
-        recipeSearchState: RecipeSearchState = this.recipeSearchState
+        recipeListState: RecipeListState = this.recipeListState
     ) = copy(
         searchBarState = searchBarState.copy(
             searchTerm = searchTerm,
             expandedState = searchBarExpandedState
         ),
-        recipeSearchState = recipeSearchState
+        recipeListState = recipeListState
     )
 }
 
@@ -32,10 +32,10 @@ data class SearchBarState(val searchTerm: String, val expandedState: Boolean) {
     }
 }
 
-sealed class RecipeSearchState {
-    data object Idle : RecipeSearchState()
-    data object Empty : RecipeSearchState()
-    data object Loading: RecipeSearchState()
-    data class Success(val recipeList: List<RecipeInfo>): RecipeSearchState()
-    data class Error(val message: String) : RecipeSearchState()
+sealed class RecipeListState {
+    data object Idle : RecipeListState()
+    data object Empty : RecipeListState()
+    data object Loading: RecipeListState()
+    data class Success(val recipeList: List<RecipeInfo>): RecipeListState()
+    data class Error(val message: String) : RecipeListState()
 }

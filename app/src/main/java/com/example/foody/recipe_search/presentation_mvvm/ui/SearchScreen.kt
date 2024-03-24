@@ -50,7 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.foody.recipe_search.presentation_mvvm.SearchNavigationEvent
 import com.example.foody.recipe_search.presentation_mvvm.SearchViewModel
-import com.example.foody.recipe_search.presentation_mvvm.model.RecipeSearchState
+import com.example.foody.recipe_search.presentation_mvvm.model.RecipeListState
 import com.example.foody.recipe_search.presentation_mvvm.model.SearchScreenState
 import com.example.foody.shared.domain.model.RecipeInfo
 
@@ -60,18 +60,19 @@ import com.example.foody.shared.domain.model.RecipeInfo
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
 
+@Suppress("SuspiciousCallableReferenceInLambda")
 @Composable
 fun SearchScreen(
     goToDetailsScreen: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val performSearch: () -> Unit = remember { { viewModel.search() } }
-    val generateRandomRecipe: () -> Unit = remember { { viewModel.showRandomRecipe() } }
-    val onValueChanged: (String) -> Unit = remember { { viewModel.updateSearchTerm(it) } }
+    val performSearch: () -> Unit = remember { viewModel::search }
+    val generateRandomRecipe: () -> Unit = remember { viewModel::showRandomRecipe }
+    val onValueChanged: (String) -> Unit = remember { viewModel::updateSearchTerm }
     val navigateWith: (String) -> Unit =
         remember { { viewModel.navigateTo(SearchNavigationEvent.ToDetails(it)) } }
-    val onFabClick: () -> Unit = remember { { viewModel.flipSearchBarExpandedState() } }
+    val onFabClick: () -> Unit = remember { viewModel::flipSearchBarExpandedState }
 
     SearchScreenContent(
         state = state,
@@ -103,11 +104,12 @@ private fun SearchScreenContent(
     onFabClick: () -> Unit
 ) {
     // for dimming the background ...
-    val modifier = if (state.searchBarState.expandedState) {
-        Modifier
-            .background(Color.LightGray)
-            .alpha(0.3f)
-    } else Modifier
+    // remember, but change if expandedState changed ...
+    val dimmingModifier = remember(state.searchBarState.expandedState) {
+        if (state.searchBarState.expandedState) {
+            Modifier.background(Color.LightGray).alpha(0.3f)
+        } else Modifier
+    }
     
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (state.searchBarState.expandedState) {
@@ -118,21 +120,21 @@ private fun SearchScreenContent(
                 generateRandomRecipe = generateRandomRecipe
             )
         }
-        when (state.recipeSearchState) {
-            is RecipeSearchState.Idle -> Unit
-            is RecipeSearchState.Empty -> EmptySearchResult()
-            is RecipeSearchState.Loading -> CircularProgressIndicator(
+        when (state.recipeListState) {
+            is RecipeListState.Idle -> Unit
+            is RecipeListState.Empty -> EmptySearchResult()
+            is RecipeListState.Loading -> CircularProgressIndicator(
                 modifier = Modifier.requiredSize(72.dp), strokeWidth = 8.dp
             )
-            is RecipeSearchState.Success -> {
+            is RecipeListState.Success -> {
                 SearchSuccess(
-                    recipeList = state.recipeSearchState.recipeList,
+                    recipeList = state.recipeListState.recipeList,
                     navigateWith = navigateWith,
                     // for dimming the background ...
-                    modifier = modifier
+                    modifier = dimmingModifier
                 )
             }
-            is RecipeSearchState.Error -> ErrorMessage(errorMessage = state.recipeSearchState.message)
+            is RecipeListState.Error -> ErrorMessage(errorMessage = state.recipeListState.message)
         }
     }
     FloatingSearchButton(onFabClick)
