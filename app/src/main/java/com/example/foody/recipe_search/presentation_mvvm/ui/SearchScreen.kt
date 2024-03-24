@@ -107,7 +107,9 @@ private fun SearchScreenContent(
     // remember, but change if expandedState changed ...
     val dimmingModifier = remember(state.searchBarState.expandedState) {
         if (state.searchBarState.expandedState) {
-            Modifier.background(Color.LightGray).alpha(0.3f)
+            Modifier
+                .background(Color.LightGray)
+                .alpha(0.3f)
         } else Modifier
     }
     
@@ -166,7 +168,7 @@ private fun SearchTextFieldAndButton(
     performSearch: () -> Unit,
     onValueChanged: (searchTerm: String) -> Unit,
     generateRandomRecipe: () -> Unit
-    ) {
+) {
     Column {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
@@ -196,7 +198,7 @@ private fun SearchTextFieldAndButton(
 }
 
 @Composable
-fun ShowOneRandomRecipe(
+fun ShowOneRecipe(
     navigateWith: (recipeId: String) -> Unit,
     randomRecipeList: List<RecipeInfo>,
 ) {
@@ -211,8 +213,8 @@ private fun SearchSuccess(
     navigateWith: (recipeId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if(recipeList.size == 1) {
-        ShowOneRandomRecipe(navigateWith = navigateWith, randomRecipeList = recipeList)
+    if (recipeList.size == 1) {
+        ShowOneRecipe(navigateWith = navigateWith, randomRecipeList = recipeList)
     } else {
         LazyVerticalGrid(columns = GridCells.Adaptive(150.dp),
             contentPadding = PaddingValues(4.dp),
@@ -220,8 +222,7 @@ private fun SearchSuccess(
             horizontalArrangement = Arrangement.spacedBy(3.dp),
             modifier = modifier,
             content = {
-                items(count = recipeList.size, key = { index -> recipeList[index].id } // ???
-                ) {
+                items(count = recipeList.size, key = { index -> recipeList[index].id }) {
                     RecipeItem(item = recipeList[it]) { recipeId ->
                         // sending one event via viewModel
                         navigateWith(recipeId)
@@ -245,7 +246,9 @@ private fun EmptySearchResult() {
 private fun RecipeItem(item: RecipeInfo, goToDetailsScreen: (String) -> Unit) {
     Card(
         elevation = CardDefaults.elevatedCardElevation(8.dp),
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+        modifier = Modifier
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+            .background(Color.Yellow)
     ) {
         Column(
             modifier = Modifier
