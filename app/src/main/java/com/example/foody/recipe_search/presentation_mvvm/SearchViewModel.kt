@@ -29,8 +29,7 @@ class SearchViewModel @Inject constructor(
 ): ViewModel() {
     private val _state = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
-
-
+    
     private val _navigation = Channel<SearchNavigationEvent>()
     val navigation: Flow<SearchNavigationEvent> = _navigation.receiveAsFlow()
 
@@ -43,12 +42,11 @@ class SearchViewModel @Inject constructor(
         // (i zato sto zelimo da ostavimo ostale eventualne delove state-a nepromenjene)
 
         viewModelScope.launch {  // prelazak na IO thread
-
             _state.emit(_state.value.copy(recipeSearchState = RecipeSearchState.Loading))
 
             val newRecipeSearchState: RecipeSearchState = try {
                 val mealList = withContext(Dispatchers.IO) {
-                    repository.search(state.value.searchTerm)
+                    repository.search(state.value.searchBarState.searchTerm)
                 }
                 if (mealList.isEmpty()) RecipeSearchState.Empty
                 else RecipeSearchState.Success(mealList = mealList)
@@ -57,13 +55,40 @@ class SearchViewModel @Inject constructor(
                 RecipeSearchState.Error("Unknown error from search.")
             }
 
-            _state.emit(_state.value.copy(recipeSearchState = newRecipeSearchState))
+            val searchBarExpandedState = shouldBarBeExpandedState(newRecipeSearchState)
+            
+            _state.emit(
+                _state.value.clone(
+                    recipeSearchState = newRecipeSearchState,
+                    searchBarExpandedState = searchBarExpandedState,
+                    searchTerm = ""
+                )
+            )
         }
     }
 
     fun updateSearchTerm(searchTerm: String) {
         viewModelScope.launch {
-            _state.emit(_state.value.copy(searchTerm = searchTerm))
+            _state.emit(
+                _state.value.clone(searchTerm = searchTerm)
+            )
+        }
+    }
+    
+    private fun shouldBarBeExpandedState(recipeSearchState: RecipeSearchState) : Boolean =
+         when (recipeSearchState) {
+            is RecipeSearchState.Idle -> true
+            is RecipeSearchState.Error -> true
+            is RecipeSearchState.Empty -> true
+            is RecipeSearchState.Loading -> true
+            is RecipeSearchState.Success -> !state.value.searchBarState.expandedState
+        }
+    
+    fun flipSearchBarExpandedState() {
+        viewModelScope.launch {
+            _state.emit(
+                _state.value.clone(searchBarExpandedState = !state.value.searchBarState.expandedState)
+            )
         }
     }
 }

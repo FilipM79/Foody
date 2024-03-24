@@ -15,7 +15,9 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.withCreationCallback
 
-
+// reified is used to be able to determine the function return type at runtime (and because of
+// VM::class.java), thus, the function must be inline. We have here one more parameter "extras",
+// which is used to get arguments when navigating.
 @Composable
 inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> assistedHiltViewModel(
     extras: T,
@@ -24,6 +26,7 @@ inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> ass
     },
     key: String? = null,
 ): VM {
+    // making VM with default Hilt VM factory (or null)
     val factory: ViewModelProvider.Factory? =
         if (viewModelStoreOwner is HasDefaultViewModelProviderFactory) {
             HiltViewModelFactory(
@@ -35,6 +38,7 @@ inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> ass
             // and assume it is an @AndroidEntryPoint annotated fragment or activity
             null
         }
+    // getting extras via assistedFactory (or empty)
     val creationExtras: CreationExtras =
         if (viewModelStoreOwner is HasDefaultViewModelProviderFactory) {
             viewModelStoreOwner.defaultViewModelCreationExtras
@@ -44,9 +48,9 @@ inline fun <reified VM : ViewModel, T, VMF: AssistedViewModelFactory<VM, T>> ass
         } else {
             CreationExtras.Empty
         }
+    // returning a VM with extras ...
     return viewModel(VM::class.java, viewModelStoreOwner, key, factory, creationExtras)
 }
-
 
 @Suppress("unused")
 @MainThread

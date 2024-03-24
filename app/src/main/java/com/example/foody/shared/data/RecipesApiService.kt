@@ -25,7 +25,6 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
     : RecipesSearchRepository, RecipeDetailsSearchRepository {
 
     companion object {
-//        private const val PAGE_SIZE: Int = 10
         private const val TAG = "FoodRecipesSearchRepository"
     }
 
@@ -46,7 +45,7 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
             throw IOException("${response.code()}, ${response.message()}")
         }
     }
-
+    
     private fun handleError(code: Int, errorMessage: String) {
         Log.e(TAG, "$code, $errorMessage")
     }
@@ -156,5 +155,4 @@ class RecipesApiService @Inject constructor(retrofit: Retrofit)
         }
         return ingredients
     }
-
 }

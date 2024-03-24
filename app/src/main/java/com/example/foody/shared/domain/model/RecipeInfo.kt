@@ -5,6 +5,7 @@ package com.example.foody.shared.domain.model
 // 5.FoodRecipesSearchRepository, 6. Ingredient, 7.RecipeInfo, 8.FoodRecipesApiService,
 // 9.ViewModelModule, 10.SearchScreenState, 11.searchViewModel, 12.SearchScreen,
 // 13.RecipesFragment, 14.MainActivity)
+
 data class RecipeInfo(
     val id: String,
     val title: String,
