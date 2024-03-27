@@ -22,17 +22,13 @@ import org.junit.Before
 import org.junit.Test
 
 class SearchViewModelTest {
-    
     @OptIn(ExperimentalCoroutinesApi::class)
     private var dispatcher = UnconfinedTestDispatcher()
     
     private lateinit var subject: SearchViewModel
     private lateinit var repoMock: RecipesSearchRepository
-    private lateinit var fakeState: RecipeListState
-    
-    private val testSearchTerm = "pie"
+    private lateinit var testSearchTerm: String
     private val testListOfRecipes = getRecipeListTestData(5)
-    
     
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
@@ -41,13 +37,16 @@ class SearchViewModelTest {
         repoMock = mockk()
     }
     
-    private fun createViewModel() {
-        subject = SearchViewModel(repoMock)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
     
     @Test
-    fun `Given we have a valid searchTerm, then list of recipes is fetched`() {
+    fun `Given we have a valid search term, Then list of recipes is fetched`() {
         // Arrangement
+        testSearchTerm = "pie"
         coEvery { repoMock.search(testSearchTerm) } returns testListOfRecipes
         createViewModel()
         
@@ -62,45 +61,62 @@ class SearchViewModelTest {
         subject.search()
         
         // Assertions
-        fakeState = RecipeListState.Success(testListOfRecipes)
         coVerify { repoMock.search(testSearchTerm) }
-        assertEquals(fakeState, subject.state.value.recipeListState)
+        assertEquals(RecipeListState.Success(testListOfRecipes), subject.state.value.recipeListState)
         
-        // testing that searchTerm is empty
+        // testing that searchTerm is set to empty after the search
         assertEquals("", subject.state.value.searchBarState.searchTerm)
         // testing that the searchBar is hidden
         assertEquals(false, subject.state.value.searchBarState.expandedState)
     }
     
     @Test
-    fun `Given I landed on a searchScreen, Then the input field is empty, And search bar is visible, And recipe list starts empty`() {
+    fun `Given we have an empty search term (or no results), Then the state is Empty`() {
         // Arrangement
-        dispatcher = StandardTestDispatcher()
-        Dispatchers.setMain(dispatcher)
-        val testScope = TestScope()
+        testSearchTerm = ""
+        coEvery { repoMock.search(testSearchTerm) } returns emptyList()
+        createViewModel()
+    
+        // Action
+        subject.updateSearchTerm(testSearchTerm)
+        subject.search()
     
         // Assertions
+        coVerify { repoMock.search(testSearchTerm) }
+        assertEquals(RecipeListState.Empty, subject.state.value.recipeListState)
+    
+        // testing that searchTerm is set to empty after the search
+        assertEquals("", subject.state.value.searchBarState.searchTerm)
+        // testing that the searchBar is visible (expanded)
+        assertEquals(true, subject.state.value.searchBarState.expandedState)
+    }
+    
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `Given we landed on search screen, Then search bar is expanded and empty, And random recipe is generated`() {
+        // Arrangement
+        testSearchTerm = "pie"
+        dispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(dispatcher)
+        
+        val testScope = TestScope()
+        lateinit var turbine: ReceiveTurbine<SearchScreenState>
+        coEvery { repoMock.randomRecipe() }.coAnswers { testListOfRecipes }
+        
         testScope.runTest {
-            coEvery { repoMock.search(testSearchTerm) } returns testListOfRecipes
-//            coEvery { repoMock.search("") } returns testListOfRecipes
-            coEvery { repoMock.randomRecipe() }.coAnswers { testListOfRecipes }
-            
+            // Action
             createViewModel()
 
-            lateinit var turbine: ReceiveTurbine<SearchScreenState>
-            turbineScope {
-                
-                turbine = subject.state.testIn(testScope)
-                coEvery { repoMock.search(testSearchTerm) } returns testListOfRecipes
-            }
-            
-            // Testing state cycle change
+            turbineScope { turbine = subject.state.testIn(testScope) }
+    
+            // Assertions
+            // Testing random recipe state cycle change on viewModel init
             assertEquals(RecipeListState.Idle, turbine.awaitItem().recipeListState)
             assertEquals(RecipeListState.Loading, turbine.awaitItem().recipeListState)
             assertEquals(RecipeListState.Success(testListOfRecipes), turbine.awaitItem().recipeListState)
             turbine.ensureAllEventsConsumed()
             turbine.cancel()
-    
+
             // testing that searchTerm is empty
             assertEquals("", subject.state.value.searchBarState.searchTerm)
             // testing that the searchBar is visible
@@ -109,14 +125,39 @@ class SearchViewModelTest {
     }
     
     @OptIn(ExperimentalCoroutinesApi::class)
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+    @Test
+    fun `Given we landed on search screen, Then on button-click, a random recipe is generated`() {
+        // Arrangement
+        dispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(dispatcher)
+        
+        val testScope = TestScope()
+        lateinit var turbine: ReceiveTurbine<SearchScreenState>
+    
+        coEvery { repoMock.randomRecipe() }.coAnswers { testListOfRecipes }
+        
+        testScope.runTest {
+            createViewModel()
+            
+            turbineScope {
+                turbine = subject.state.testIn(testScope)
+                coEvery { repoMock.randomRecipe() } returns testListOfRecipes
+            }
+            turbine.skipItems(3)
+            turbine.ensureAllEventsConsumed()
+    
+            // Action (on "generate" button click)
+            subject.showRandomRecipe()
+    
+            // Assertions
+            assertEquals(RecipeListState.Loading, turbine.awaitItem().recipeListState)
+            assertEquals(RecipeListState.Success(testListOfRecipes), turbine.awaitItem().recipeListState)
+            turbine.ensureAllEventsConsumed()
+            turbine.cancel()
+        }
     }
     
-    
-//    @Test
-//    fun showRandomRecipe() {
-//    }
-
+    private fun createViewModel() {
+        subject = SearchViewModel(repoMock)
+    }
 }
