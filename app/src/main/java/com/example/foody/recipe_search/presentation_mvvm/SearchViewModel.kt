@@ -1,6 +1,5 @@
 package com.example.foody.recipe_search.presentation_mvvm
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foody.recipe_search.domain.RecipesSearchRepository
@@ -29,7 +28,7 @@ class SearchViewModel @Inject constructor(
     private val repository: RecipesSearchRepository,
 ): ViewModel() {
     
-    private val _state = MutableStateFlow(SearchScreenState.initialValue)
+    private val _state : MutableStateFlow<SearchScreenState> = MutableStateFlow(SearchScreenState.initialValue)
     val state : StateFlow<SearchScreenState> = _state
     
     private val _navigation = Channel<SearchNavigationEvent>()
@@ -51,7 +50,7 @@ class SearchViewModel @Inject constructor(
     }
     
     fun showRandomRecipe() {
-        fetchRecipeListAndSearchBarState( { repository.randomRecipe() }, { true })
+        fetchRecipeListAndSearchBarState( { repository.randomRecipe() }, { true } )
     }
     
     private fun fetchRecipeListAndSearchBarState(
@@ -61,6 +60,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _state.emit(_state.value.copy(recipeListState = RecipeListState.Loading))
     
+    
             val newRecipeListState = try {
                 val recipeList = withContext(Dispatchers.IO) {
                     repositoryFunction() // calling lambda here, instead when passing it
@@ -69,8 +69,8 @@ class SearchViewModel @Inject constructor(
                 if (recipeList.isEmpty()) RecipeListState.Empty
                 else RecipeListState.Success(recipeList = recipeList)
             } catch (e: Exception) {
-                Log.e("RecipeSearchViewModel", e.message.orEmpty(), e)
-                RecipeListState.Error("Unknown error from search.")
+                e.printStackTrace()
+                RecipeListState.Error("Unknown error from SearchVM.")
             }
     
             _state.emit(
