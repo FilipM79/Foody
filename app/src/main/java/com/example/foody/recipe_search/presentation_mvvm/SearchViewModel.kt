@@ -70,7 +70,7 @@ class SearchViewModel @Inject constructor(
                 else RecipeListState.Success(recipeList = recipeList)
             } catch (e: Exception) {
                 e.printStackTrace()
-                RecipeListState.Error(e.stackTraceToString())
+                RecipeListState.Error("Unknown error from SearchVM.")
             }
     
             _state.emit(

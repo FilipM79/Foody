@@ -10,6 +10,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -20,6 +21,7 @@ import org.junit.Assert.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 class SearchViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,14 +55,14 @@ class SearchViewModelTest {
         // Action
         subject.updateSearchTerm(testSearchTerm)
         
-        // Assertion
-        // Testing that searchTerm is set to input value
+        // Assertion, Testing that searchTerm is set to input value
         assertEquals(testSearchTerm, subject.state.value.searchBarState.searchTerm)
         
         // Action
         subject.search()
         
         // Assertions
+        // Testing that after calling a search function with valid searchTerm, the state is Success
         coVerify { repoMock.search(testSearchTerm) }
         assertEquals(RecipeListState.Success(testListOfRecipes), subject.state.value.recipeListState)
         
@@ -93,7 +95,7 @@ class SearchViewModelTest {
     
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `Given we landed on search screen, Then search bar is expanded and empty, And random recipe is generated`() {
+    fun `Given we landed on search screen, Then search bar is expanded and empty, And random recipe is auto generated`() {
         // Arrangement
         testSearchTerm = "pie"
         dispatcher = StandardTestDispatcher()
@@ -110,7 +112,7 @@ class SearchViewModelTest {
             turbineScope { turbine = subject.state.testIn(testScope) }
     
             // Assertions
-            // Testing random recipe state cycle change on viewModel init
+            // Testing random recipe state cycle proper change on viewModel initialisation
             assertEquals(RecipeListState.Idle, turbine.awaitItem().recipeListState)
             assertEquals(RecipeListState.Loading, turbine.awaitItem().recipeListState)
             assertEquals(RecipeListState.Success(testListOfRecipes), turbine.awaitItem().recipeListState)
@@ -126,7 +128,7 @@ class SearchViewModelTest {
     
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `Given we landed on search screen, Then on button-click, a random recipe is generated`() {
+    fun `Given we landed on search screen, Then on button-click, a random recipe is re-generated`() {
         // Arrangement
         dispatcher = StandardTestDispatcher()
         Dispatchers.setMain(dispatcher)
@@ -150,11 +152,35 @@ class SearchViewModelTest {
             subject.showRandomRecipe()
     
             // Assertions
+            // Testing the state after clicking on "generate random recipe" button
             assertEquals(RecipeListState.Loading, turbine.awaitItem().recipeListState)
             assertEquals(RecipeListState.Success(testListOfRecipes), turbine.awaitItem().recipeListState)
             turbine.ensureAllEventsConsumed()
             turbine.cancel()
         }
+    }
+    
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `test Given we land on search screen, On recipe list fail to fetch, Then error message is shown`() {
+        // Arrangement
+        testSearchTerm = "some term"
+        dispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(dispatcher)
+        
+        coEvery { repoMock.search(testSearchTerm) } throws IOException()
+        createViewModel()
+        
+        // Action
+        subject.search()
+        
+        // Assertion
+        runTest{
+            delay(500)
+//            assertEquals(RecipeListState.Error("Unknown error from SearchVM."), subject.state.value.recipeListState)
+            assertEquals(RecipeListState.Loading, subject.state.value.recipeListState)
+        }
+        assertEquals(RecipeListState.Error("Unknown error from SearchVM."), subject.state.value.recipeListState)
     }
     
     private fun createViewModel() {
